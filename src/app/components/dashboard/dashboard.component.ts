@@ -6,6 +6,10 @@ import { StudentDashboardComponent } from "../student/student-dashboard.componen
 import { WorksAdminDashboardComponent } from "../works-admin/works-admin-dashboard.component"
 import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboard.component"
 
+// Agregar las nuevas importaciones
+import { UploadWorkComponent } from "../student/upload-work/upload-work.component"
+import { MyWorksComponent } from "../student/my-works/my-works.component"
+
 @Component({
   selector: "app-dashboard",
   standalone: true,
@@ -16,6 +20,8 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
     StudentDashboardComponent,
     WorksAdminDashboardComponent,
     UsersAdminDashboardComponent,
+    UploadWorkComponent,
+    MyWorksComponent,
   ],
   template: `
     <div class="d-flex vh-100">
@@ -33,6 +39,8 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
           <app-student-dashboard *ngIf="activeView === 'student-dashboard'"></app-student-dashboard>
           <app-works-admin-dashboard *ngIf="activeView === 'works-admin-dashboard'"></app-works-admin-dashboard>
           <app-users-admin-dashboard *ngIf="activeView === 'users-admin-dashboard'"></app-users-admin-dashboard>
+          <app-upload-work *ngIf="activeView === 'upload-work'"></app-upload-work>
+          <app-my-works *ngIf="activeView === 'my-works'"></app-my-works>
         </main>
       </div>
     </div>
