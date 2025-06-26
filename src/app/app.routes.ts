@@ -24,13 +24,13 @@ export const routes: Routes = [
     path: 'works-admin',
     loadComponent: () => import('./components/works-admin/works-admin-dashboard.component').then(m => m.WorksAdminDashboardComponent),
     canActivate: [RoleGuard],
-    data: { roles: ['MAESTRO'] }
+    data: { roles: ['PROFESOR'] }
   },
   {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [RoleGuard],
-    data: { roles: ['MAESTRO', 'ALUMNO', 'ADMINISTRADOR'] }
+    data: { roles: ['PROFESOR', 'ALUMNO', 'ADMINISTRADOR'] }
   },
   {
     path: 'login',

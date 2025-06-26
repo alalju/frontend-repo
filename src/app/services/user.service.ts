@@ -1,14 +1,19 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, type Observable } from "rxjs"
+import { BehaviorSubject } from "rxjs"
+import { Observable } from 'rxjs';
 import type { User, UserStats } from "../models/user.model"
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
   providedIn: "root",
 })
 export class UserService {
+  private apiUrl = 'http://localhost:8081/api/usuarios';
   private usersSubject = new BehaviorSubject<User[]>([])
   public users$ = this.usersSubject.asObservable()
 
+  constructor(private http: HttpClient) {}
+  
   private mockUsers: User[] = [
     {
       id: 1,
@@ -41,30 +46,7 @@ export class UserService {
     },
   ]
 
-  constructor() {
-    this.usersSubject.next(this.mockUsers)
-  }
-
-  getUsers(): Observable<User[]> {
-    return this.users$
-  }
-
-  getUserStats(): Observable<UserStats> {
-    return new BehaviorSubject<UserStats>({
-      total: 1270,
-      students: 1250,
-      admins: 20,
-      newToday: 5,
-    }).asObservable()
-  }
-
-  getUsersByCareer(): Observable<any[]> {
-    return new BehaviorSubject([
-      { career: "Ing. Software", count: 450 },
-      { career: "Ing. Forestal", count: 320 },
-      { career: "Lic. Turística", count: 280 },
-      { career: "Lic. Biología", count: 350 },
-      { career: "Lic. C. Ambientales", count: 250 },
-    ]).asObservable()
+  getUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}`);
   }
 }

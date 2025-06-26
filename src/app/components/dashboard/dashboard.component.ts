@@ -59,7 +59,7 @@ export class DashboardComponent implements OnInit {
         this.userRole = "users-admin"
         this.activeView = "users-admin-dashboard"
         break
-      case "MAESTRO":
+      case "PROFESOR":
         this.userRole = "works-admin"
         this.activeView = "works-admin-dashboard"
         break
