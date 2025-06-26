@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
+import { Router } from "@angular/router"
 
 @Component({
   selector: "app-header",
@@ -61,7 +62,11 @@ import { FormsModule } from "@angular/forms"
               <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Perfil</a></li>
               <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Configuración</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+              <li>
+                <button class="dropdown-item text-danger" (click)="cerrarSesion()">
+                  <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                </button>
+              </li>
             </ul>
           </div>
         </div>
@@ -72,6 +77,8 @@ import { FormsModule } from "@angular/forms"
 export class HeaderComponent {
   @Input() userRole!: "student" | "works-admin" | "users-admin"
   searchQuery = ""
+
+  constructor(private router: Router) {}
 
   getRoleTitle(): string {
     switch (this.userRole) {
@@ -84,5 +91,10 @@ export class HeaderComponent {
       default:
         return "Sistema Académico"
     }
+  }
+
+  cerrarSesion(): void {
+    localStorage.removeItem('usuario')      // Limpia el usuario
+    this.router.navigate(['/login'])        // Redirige al login
   }
 }

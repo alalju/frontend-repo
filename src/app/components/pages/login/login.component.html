@@ -8,19 +8,18 @@
         </div>
         <p class="text-university-green fs-5">Repositorio de Trabajos Académicos</p>
       </div>
-  
       <div class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
           <!-- Login Card -->
           <div class="card card-university shadow">
             <div class="card-header text-center bg-white">
-              <img src="assets/img/logo.jpg" alt="logo-unsij" width="50%">
+              <!-- <img [src]="imgSrc" alt="logo-unsij" width="50%"> -->
               <h3 class="text-university-green mb-1">Iniciar Sesión</h3>
               <p class="text-muted mb-0">Accede a tu cuenta</p>
             </div>
             <div class="card-body">
               <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-                <div class="mb-3">
+                <div class="mb-3" >
                   <label for="email" class="form-label">Correo Electrónico</label>
                   <input 
                     type="email" 
@@ -31,15 +30,23 @@
                     placeholder="estudiante@gmail.com"
                     required>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3 position-relative">
                   <label for="password" class="form-label">Contraseña</label>
                   <input 
-                    type="password" 
+                    [type]="showPassword ? 'text' : 'password'" 
                     class="form-control" 
                     id="password"
                     name="password"
                     [(ngModel)]="loginData.contrasenia"
                     required>
+
+                    <!-- Icono de mostrar/ocultar -->
+                  <i 
+                    class="bi"
+                    [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"
+                    (click)="showPassword = !showPassword"
+                    style="position: absolute; top: 38px; right: 15px; cursor: pointer; color: #6c757d;">
+                  </i>
                 </div>
                 <button type="submit" class="btn btn-university-green w-100 mb-3">
                   Iniciar Sesión
@@ -49,26 +56,15 @@
                     ¿Olvidaste tu contraseña?
                   </a>
                 </div>
+                <div *ngIf="errorMessage" class="text-center mb-3">
+                  <div
+                    class="alert d-flex align-items-center justify-content-center gap-2 fw-medium"
+                    style="background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; border-radius: 0.75rem; padding: 0.75rem 1rem;">
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.2rem;"></i>
+                    {{ errorMessage }}
+                  </div>
+                </div>
               </form>
-            </div>
-          </div>
-  
-          <!-- Demo Navigation -->
-          <div class="mt-4">
-            <h5 class="text-center text-university-green fw-semibold mb-3">Vista Previa del Sistema</h5>
-            <div class="d-grid gap-2">
-              <a routerLink="/student-dashboard" class="btn btn-outline-success d-flex align-items-center">
-                <i class="bi bi-book me-2"></i>
-                Dashboard Estudiante
-              </a>
-              <a routerLink="/user-admin-dashboard" class="btn btn-outline-success d-flex align-items-center">
-                <i class="bi bi-people me-2"></i>
-                Dashboard Admin. Usuarios
-              </a>
-              <a routerLink="/work-admin-dashboard" class="btn btn-outline-success d-flex align-items-center">
-                <i class="bi bi-shield-check me-2"></i>
-                Dashboard Admin. Trabajos
-              </a>
             </div>
           </div>
         </div>

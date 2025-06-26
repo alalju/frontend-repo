@@ -19,7 +19,7 @@ interface MenuItem {
           <i class="bi bi-mortarboard-fill me-2 fs-5"></i>
           <span class="fw-bold">Sistema Académico</span>
         </div>
-
+        <!--
         <select 
           class="form-select bg-success border-success text-white"
           [(ngModel)]="userRole"
@@ -29,6 +29,7 @@ interface MenuItem {
           <option value="works-admin">Admin. Trabajos</option>
           <option value="users-admin">Admin. Usuarios</option>
         </select>
+        -->
       </div>
 
       <nav class="px-3 pb-4">
