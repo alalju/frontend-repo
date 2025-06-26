@@ -1,0 +1,96 @@
+<div class="min-vh-100" style="background: linear-gradient(135deg, var(--university-green-light) 0%, var(--university-green-light) 100%);">
+    <div class="container py-5">
+      <!-- Header -->
+      <div class="text-center mb-4">
+        <div class="d-flex align-items-center justify-content-center mb-4">
+          <i class="bi bi-mortarboard-fill text-university-green me-3" style="font-size: 3rem;"></i>
+          <h1 class="text-university-green fw-bold mb-0">RepoUNSIJ</h1>
+        </div>
+        <p class="text-university-green fs-5">Repositorio de Trabajos Académicos</p>
+      </div>
+  
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+          <!-- Login Card -->
+          <div class="card card-university shadow">
+            <div class="card-header text-center bg-white">
+              <img src="assets/img/logo.jpg" alt="logo-unsij" width="50%">
+              <h3 class="text-university-green mb-1">Iniciar Sesión</h3>
+              <p class="text-muted mb-0">Accede a tu cuenta</p>
+            </div>
+            <div class="card-body">
+              <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+                <div class="mb-3">
+                  <label for="email" class="form-label">Correo Electrónico</label>
+                  <input 
+                    type="email" 
+                    class="form-control" 
+                    id="email" 
+                    name="correo"
+                    [(ngModel)]="loginData.correo"
+                    placeholder="estudiante@gmail.com"
+                    required>
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Contraseña</label>
+                  <input 
+                    type="password" 
+                    class="form-control" 
+                    id="password"
+                    name="password"
+                    [(ngModel)]="loginData.contrasenia"
+                    required>
+                </div>
+                <button type="submit" class="btn btn-university-green w-100 mb-3">
+                  Iniciar Sesión
+                </button>
+                <div class="text-center">
+                  <a href="#" class="text-university-green text-decoration-none">
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+  
+          <!-- Demo Navigation -->
+          <div class="mt-4">
+            <h5 class="text-center text-university-green fw-semibold mb-3">Vista Previa del Sistema</h5>
+            <div class="d-grid gap-2">
+              <a routerLink="/student-dashboard" class="btn btn-outline-success d-flex align-items-center">
+                <i class="bi bi-book me-2"></i>
+                Dashboard Estudiante
+              </a>
+              <a routerLink="/user-admin-dashboard" class="btn btn-outline-success d-flex align-items-center">
+                <i class="bi bi-people me-2"></i>
+                Dashboard Admin. Usuarios
+              </a>
+              <a routerLink="/work-admin-dashboard" class="btn btn-outline-success d-flex align-items-center">
+                <i class="bi bi-shield-check me-2"></i>
+                Dashboard Admin. Trabajos
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Carreras -->
+      <div class="mt-5">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <h5 class="text-center text-university-green fw-semibold mb-4">Carreras Disponibles</h5>
+            <div class="row g-3">
+              <div class="col-md-6 col-lg-4" *ngFor="let carrera of carreras">
+                <div class="card card-university h-100">
+                  <div class="card-body">
+                    <p class="card-text text-university-green fw-medium mb-0">{{ carrera }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

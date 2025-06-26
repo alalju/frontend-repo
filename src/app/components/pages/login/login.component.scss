@@ -1,0 +1,23 @@
+.min-vh-100 {
+    min-height: 100vh;
+  }
+  
+  .card-university {
+    transition: transform 0.2s ease-in-out;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+  
+  .btn-outline-success {
+    border-color: var(--university-green);
+    color: var(--university-green);
+    
+    &:hover {
+      background-color: var(--university-green);
+      border-color: var(--university-green);
+    }
+  }
+
+  
