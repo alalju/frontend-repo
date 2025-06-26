@@ -1,0 +1,95 @@
+.min-vh-100 {
+    min-height: 100vh;
+  }
+  
+  .card-university {
+    transition: transform 0.2s ease-in-out;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+  
+  .btn-outline-success {
+    border-color: var(--university-green);
+    color: var(--university-green);
+    
+    &:hover {
+      background-color: var(--university-green);
+      border-color: var(--university-green);
+    }
+  }
+
+  .bg-university-green {
+  background-color: var(--university-green) !important;
+}
+
+.text-university-green {
+  color: var(--university-green) !important;
+}
+
+.border-university-green {
+  border-color: var(--university-green-200) !important;
+}
+
+
+.btn-university-green {
+  background-color: var(--university-green);
+  border-color: var(--university-green);
+  color: white;
+  
+  &:hover {
+    background-color: var(--university-green-dark);
+    border-color: var(--university-green-dark);
+  }
+}
+
+.card-university {
+  border: 1px solid var(--university-green-200);
+  box-shadow: 0 2px 4px rgba(22, 160, 133, 0.1);
+}
+
+.badge-university-green {
+  background-color: var(--university-green-100);
+  color: var(--university-green-800);
+  border: 1px solid var(--university-green-200);
+}
+
+.badge-approved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.badge-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.badge-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.hover-shadow {
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 8px rgba(22, 160, 133, 0.15);
+  }
+}
+
+// Responsive utilities
+@media (max-width: 768px) {
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+}
+
+  
