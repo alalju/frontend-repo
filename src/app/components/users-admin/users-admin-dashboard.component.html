@@ -109,9 +109,7 @@
             <div class="col-md-3">
               <select class="form-select" [(ngModel)]="selectedRole">
                 <option value="">Todos los roles</option>
-                <option value="student">Estudiante</option>
-                <option value="works-admin">Admin. Trabajos</option>
-                <option value="users-admin">Admin. Usuarios</option>
+                <option *ngFor="let rol of roles" [value]="rol.nombre">{{ rol.nombre | titlecase }}</option>
               </select>
             </div>
             <div class="col-md-3">
@@ -119,7 +117,6 @@
                 <option value="">Todos los estados</option>
                 <option value="active">Activo</option>
                 <option value="inactive">Inactivo</option>
-                <option value="blocked">Bloqueado</option>
               </select>
             </div>
             <div class="col-md-2">
@@ -132,34 +129,34 @@
           <!-- Users Table -->
           <div class="table-responsive">
             <table class="table table-hover">
-              <thead>
+              <thead class="text-center">
                 <tr>
                   <th>Nombre</th>
-                  <th>Email</th>
+                  <th>Correo</th>
                   <th>Rol</th>
-                  <th>Carrera</th>
+                  <!-- <th>Carrera</th> -->
                   <th>Estado</th>
-                  <th>Último Acceso</th>
+                  <!-- <th>Último Acceso</th> -->
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr *ngFor="let user of users">
-                  <td class="fw-bold">{{ user.name }}</td>
-                  <td>{{ user.email }}</td>
+              <tbody class="text-center">
+                <tr *ngFor="let user of filteredUsers">
+                  <td class="fw-bold">{{ user.nombre }}</td>
+                  <td>{{ user.correo }}</td>
                   <td>
-                    <span [class]="getRoleBadgeClass(user.role)" class="badge">
-                      <i [class]="getRoleIcon(user.role)" class="me-1"></i>
-                      {{ getRoleText(user.role) }}
+                    <span [class]="getRoleBadgeClass(user.rol.nombre)" class="badge">
+                      <i [class]="getRoleIcon(user.rol.nombre)" class="me-1"></i>
+                      {{ getRoleText(user.rol.nombre) }}
                     </span>
                   </td>
-                  <td>{{ user.career || 'N/A' }}</td>
+                  <!-- <td>{{ user.career || 'N/A' }}</td> -->
                   <td>
-                    <span [class]="getStatusBadgeClass(user.status)" class="badge">
-                      {{ getStatusText(user.status) }}
+                    <span [class]="getStatusBadgeClass(user.activo)" class="badge">
+                      {{ getStatusText(user.activo) }}
                     </span>
                   </td>
-                  <td>{{ user.lastLogin }}</td>
+                  <!-- <td>{{ user.lastLogin }}</td> -->
                   <td>
                     <div class="btn-group" role="group">
                       <button class="btn btn-sm btn-outline-secondary" title="Ver">

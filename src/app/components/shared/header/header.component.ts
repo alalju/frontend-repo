@@ -11,7 +11,7 @@ import { Router } from "@angular/router"
     <header class="bg-white shadow-sm border-bottom">
       <div class="d-flex justify-content-between align-items-center px-4 py-3">
         <div>
-          <h1 class="h3 text-success fw-bold mb-0">Universidad Verde</h1>
+          <h1 class="h3 text-success fw-bold mb-0">RepoUNSIJ</h1>
           <p class="text-muted small mb-0">{{ getRoleTitle() }}</p>
         </div>
 

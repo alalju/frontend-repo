@@ -9,6 +9,8 @@ import { HttpClient } from "@angular/common/http";
 })
 export class UserService {
   private apiUrl = 'http://localhost:8081/api/usuarios';
+  private apiUrlRoles = 'http://localhost:8081/api/roles';
+
   private usersSubject = new BehaviorSubject<User[]>([])
   public users$ = this.usersSubject.asObservable()
 
@@ -48,5 +50,9 @@ export class UserService {
 
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}`);
+  }
+
+   getRoles(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrlRoles}`);
   }
 }

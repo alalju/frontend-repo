@@ -14,6 +14,7 @@ import { Observable } from "rxjs"
 })
 export class UsersAdminDashboardComponent implements OnInit {
   users: any[] = []
+  roles: any[] = []
   searchText = ""
   selectedRole = ""
   selectedStatus = ""
@@ -35,7 +36,7 @@ export class UsersAdminDashboardComponent implements OnInit {
 
       users.forEach((user) => {
         if (user.rol.nombre === "ADMINISTRADOR") {
-          this.totalAlumnos++;
+          this.totalAdministradores++;
         }
         
         if (user.rol.nombre === "PROFESOR") {
@@ -43,7 +44,7 @@ export class UsersAdminDashboardComponent implements OnInit {
         }
         
         if (user.rol.nombre === "ALUMNO") {
-          this.totalAdministradores++;
+          this.totalAlumnos++;
         }
       })
 
@@ -52,15 +53,40 @@ export class UsersAdminDashboardComponent implements OnInit {
       this.porcentajeProfesores = this.totalUsers ? Math.round((this.totalProfesores / this.totalUsers) * 100) : 0;
       this.porcentajeAdministradores = this.totalUsers ? Math.round((this.totalAdministradores / this.totalUsers) * 100) : 0;
     })
+
+    this.userService.getRoles().subscribe((roles) => {
+      console.log("Roles obtenidos:", roles)
+      this.roles = roles;
+    })
+  }
+
+  get filteredUsers() {
+    return this.users.filter(user => {
+      const search = (this.searchText || '').toLowerCase();
+      const matchesText =
+        user.nombre.toLowerCase().includes(search) ||
+        user.correo.toLowerCase().includes(search);
+
+      const matchesRole =
+        !this.selectedRole || user.rol.nombre === this.selectedRole;
+
+      const matchesStatus =
+        !this.selectedStatus ||
+        (this.selectedStatus === 'active' && user.activo === true) ||
+        (this.selectedStatus === 'inactive' && user.activo === false) ||
+        (this.selectedStatus === 'blocked' && user.bloqueado === true);
+
+      return matchesText && matchesRole && matchesStatus;
+    });
   }
 
   getRoleBadgeClass(role: string): string {
     switch (role) {
-      case "student":
+      case "ALUMNO":
         return "bg-success"
-      case "works-admin":
+      case "PROFESOR":
         return "bg-primary"
-      case "users-admin":
+      case "ADMINISTRADOR":
         return "bg-info"
       default:
         return "bg-secondary"
@@ -82,38 +108,34 @@ export class UsersAdminDashboardComponent implements OnInit {
 
   getRoleText(role: string): string {
     switch (role) {
-      case "student":
-        return "Estudiante"
-      case "works-admin":
-        return "Admin. Trabajos"
-      case "users-admin":
-        return "Admin. Usuarios"
+      case "ALUMNO":
+        return "Alumno"
+      case "PROFESOR":
+        return "Profesor"
+      case "ADMINISTRADOR":
+        return "Administrador"
       default:
         return "Desconocido"
     }
   }
 
-  getStatusBadgeClass(status: string): string {
+  getStatusBadgeClass(status: boolean): string {
     switch (status) {
-      case "active":
+      case true:
         return "bg-success"
-      case "inactive":
-        return "bg-secondary"
-      case "blocked":
+      case false:
         return "bg-danger"
       default:
         return "bg-secondary"
     }
   }
 
-  getStatusText(status: string): string {
+  getStatusText(status: boolean): string {
     switch (status) {
-      case "active":
+      case true:
         return "Activo"
-      case "inactive":
+      case false:
         return "Inactivo"
-      case "blocked":
-        return "Bloqueado"
       default:
         return "Desconocido"
     }
