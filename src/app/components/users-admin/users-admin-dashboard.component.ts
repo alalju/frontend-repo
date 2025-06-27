@@ -1,9 +1,7 @@
-import { Component, type OnInit } from "@angular/core"
+import { Component, EventEmitter, Output, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { UserService } from "../../services/user.service"
-import type { User } from "../../models/user.model"
-import { Observable } from "rxjs"
 
 @Component({
   selector: "app-users-admin-dashboard",
@@ -13,6 +11,8 @@ import { Observable } from "rxjs"
   styleUrl: "./users-admin-dashboard.component.scss",
 })
 export class UsersAdminDashboardComponent implements OnInit {
+  @Output() viewChanged = new EventEmitter<string>();
+
   users: any[] = []
   roles: any[] = []
   searchText = ""
@@ -25,6 +25,8 @@ export class UsersAdminDashboardComponent implements OnInit {
   porcentajeAlumnos = 0
   porcentajeProfesores = 0
   porcentajeAdministradores = 0
+  selectedUser: any = null;
+  isModalOpen = false;
 
   constructor(private userService: UserService) {}
 
@@ -73,11 +75,46 @@ export class UsersAdminDashboardComponent implements OnInit {
       const matchesStatus =
         !this.selectedStatus ||
         (this.selectedStatus === 'active' && user.activo === true) ||
-        (this.selectedStatus === 'inactive' && user.activo === false) ||
-        (this.selectedStatus === 'blocked' && user.bloqueado === true);
-
+        (this.selectedStatus === 'inactive' && user.activo === false);
       return matchesText && matchesRole && matchesStatus;
     });
+  }
+
+  cambiarVista(nuevaVista: string) {
+    console.log("Cambiando vista a:", nuevaVista);
+    this.viewChanged.emit(nuevaVista);
+  }
+
+  viewUser(user: any) {
+    this.selectedUser = user;
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+    this.selectedUser = null;
+  }
+
+  editUser(user: any) {
+    // Aquí puedes abrir un formulario de edición o navegar a la vista de edición
+    console.log('Editar usuario:', user);
+    this.viewChanged.emit('add-user'); // Ejemplo de navegación
+  }
+
+  blockUser(user: any) {
+    if (confirm(`¿Seguro que deseas activar a ${user.nombre}?`)) {
+      this.userService.activateUser(user.id).subscribe(() => {
+        user.activo = !user.activo;
+      });
+    }
+  }
+
+  deleteUser(user: any) {
+    if (confirm(`¿Seguro que deseas eliminar a ${user.nombre}?`)) {
+      this.userService.deleteUser(user.id).subscribe(() => {
+        this.users = this.users.filter(u => u.id !== user.id);
+      });
+    }
   }
 
   getRoleBadgeClass(role: string): string {
@@ -140,4 +177,7 @@ export class UsersAdminDashboardComponent implements OnInit {
         return "Desconocido"
     }
   }
+
+  
+
 }

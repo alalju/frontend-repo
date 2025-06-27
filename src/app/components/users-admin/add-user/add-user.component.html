@@ -1,0 +1,142 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="display-6 fw-bold text-dark">Crear Nuevo Usuario</h2>
+      <p class="text-muted">Completa el formulario para agregar un usuario al sistema</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Información del Usuario</h5>
+          <small class="text-muted">Todos los campos marcados con * son obligatorios</small>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()" #userForm="ngForm">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="nombre" class="form-label">Nombre Completo *</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="nombre"
+                  [(ngModel)]="userData.nombre"
+                  name="nombre"
+                  required
+                  placeholder="Nombre y apellidos">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="correo" class="form-label">Correo Electrónico *</label>
+                <input 
+                  type="email" 
+                  class="form-control" 
+                  id="correo"
+                  [(ngModel)]="userData.correo"
+                  name="correo"
+                  required
+                  placeholder="usuario@ejemplo.com">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="rol" class="form-label">Rol *</label>
+                <select 
+                  class="form-select" 
+                  id="rol"
+                  [(ngModel)]="userData.rol.id"
+                  name="rol"
+                  required>
+                  <option value="">Selecciona un rol</option>
+                  <option *ngFor="let rol of roles" [value]="rol.id">
+                    {{ rol.nombre }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="form-check form-switch mt-2">
+                  <label class="form-check-label ms-2" for="activoSwitch">
+                    Activo
+                  </label>
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="activoSwitch"
+                    [(ngModel)]="userData.activo"
+                    name="activo"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="password" class="form-label">Contraseña *</label>
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  id="contrasenia"
+                  [(ngModel)]="userData.contrasenia"
+                  name="contrasenia"
+                  required
+                  minlength="6"
+                  placeholder="Mínimo 6 caracteres">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="confirmPassword" class="form-label">Confirmar Contraseña *</label>
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  id="confirmPassword"
+                  [(ngModel)]="userData.confirmPassword"
+                  name="confirmPassword"
+                  required
+                  minlength="6"
+                  placeholder="Repite la contraseña">
+              </div>
+            </div>
+
+            <div *ngIf="errorMessage" class="alert alert-danger">
+              ⚠️ {{ errorMessage }}
+            </div>
+            <div *ngIf="successMessage" class="alert alert-success">
+              ✅ {{ successMessage }}
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary" (click)="limpiarFormulario()">
+                ❌ Cancelar
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-success"
+                [disabled]="!userForm.form.valid || isLoading">
+                <span *ngIf="!isLoading">👤 Crear Usuario</span>
+                <span *ngIf="isLoading">⏳ Creando...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar con guía -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h6 class="card-title mb-0">
+            📝 Guía para Crear Usuario
+          </h6>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2">✅ Ingresa un correo válido</li>
+            <li class="mb-2">✅ La contraseña debe tener al menos 6 caracteres</li>
+            <li class="mb-2">✅ Selecciona el rol adecuado</li>
+            <li class="mb-2">✅ El usuario podrá iniciar sesión inmediatamente si está activo</li>
+          </ul>
+        </div>
+      </div>
+    </div>

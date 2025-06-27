@@ -7,6 +7,7 @@ import { WorksAdminDashboardComponent } from "../works-admin/works-admin-dashboa
 import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboard.component"
 import { UploadWorkComponent } from "../student/upload-work/upload-work.component"
 import { MyWorksComponent } from "../student/my-works/my-works.component"
+import { AddUserComponent } from "../users-admin/add-user/add-user.component"
 
 @Component({
   selector: "app-dashboard",
@@ -20,6 +21,7 @@ import { MyWorksComponent } from "../student/my-works/my-works.component"
     UsersAdminDashboardComponent,
     UploadWorkComponent,
     MyWorksComponent,
+    AddUserComponent
   ],
   template: `
     <div class="d-flex vh-100">
@@ -37,9 +39,11 @@ import { MyWorksComponent } from "../student/my-works/my-works.component"
         <main class="flex-fill overflow-auto bg-light p-4">
           <app-student-dashboard *ngIf="activeView === 'student-dashboard'"></app-student-dashboard>
           <app-works-admin-dashboard *ngIf="activeView === 'works-admin-dashboard'"></app-works-admin-dashboard>
-          <app-users-admin-dashboard *ngIf="activeView === 'users-admin-dashboard'"></app-users-admin-dashboard>
+          <app-users-admin-dashboard (viewChanged)="onViewChanged($event)" *ngIf="activeView === 'users-admin-dashboard'" ></app-users-admin-dashboard>
           <app-upload-work *ngIf="activeView === 'upload-work'"></app-upload-work>
           <app-my-works *ngIf="activeView === 'my-works'"></app-my-works>
+          <app-add-user *ngIf="activeView === 'add-user'"></app-add-user>
+          
         </main>
       </div>
     </div>
@@ -48,6 +52,8 @@ import { MyWorksComponent } from "../student/my-works/my-works.component"
 export class DashboardComponent implements OnInit {
   activeView = ""
   userRole: "student" | "works-admin" | "users-admin" = "student"
+
+  
 
   ngOnInit(): void {
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
