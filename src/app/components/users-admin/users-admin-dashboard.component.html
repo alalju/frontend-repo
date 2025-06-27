@@ -162,11 +162,11 @@
                       <button class="btn btn-sm btn-outline-secondary" title="Ver" (click)="viewUser(user)">
                         <i class="bi bi-eye"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-secondary" title="Editar" (click)="editUser(user)">
+                      <!-- <button class="btn btn-sm btn-outline-secondary" title="Editar" (click)="editUser(user)">
                         <i class="bi bi-pencil"></i>
-                      </button>
+                      </button> -->
                       <button class="btn btn-sm btn-outline-warning" title="Bloquear" (click)="blockUser(user)">
-                        <i class="bi bi-lock"></i>
+                        <i [class]="user.activo ? 'bi bi-lock' : 'bi bi-unlock' "></i>
                       </button>
                       <button class="btn btn-sm btn-outline-danger" title="Eliminar" (click)="deleteUser(user)">
                         <i class="bi bi-trash"></i>

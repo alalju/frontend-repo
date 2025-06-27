@@ -102,7 +102,8 @@ export class UsersAdminDashboardComponent implements OnInit {
   }
 
   blockUser(user: any) {
-    if (confirm(`¿Seguro que deseas activar a ${user.nombre}?`)) {
+
+    if (confirm(`¿Seguro que deseas ${user.activo ? 'desactivar':'activar'} a ${user.nombre}?`)) {
       this.userService.activateUser(user.id).subscribe(() => {
         user.activo = !user.activo;
       });
