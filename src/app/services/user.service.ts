@@ -1,14 +1,21 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, type Observable } from "rxjs"
+import { BehaviorSubject } from "rxjs"
+import { Observable } from 'rxjs';
 import type { User, UserStats } from "../models/user.model"
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
   providedIn: "root",
 })
 export class UserService {
+  private apiUrl = 'http://localhost:8081/api/usuarios';
+  private apiUrlRoles = 'http://localhost:8081/api/roles';
+
   private usersSubject = new BehaviorSubject<User[]>([])
   public users$ = this.usersSubject.asObservable()
 
+  constructor(private http: HttpClient) {}
+  
   private mockUsers: User[] = [
     {
       id: 1,
@@ -41,30 +48,23 @@ export class UserService {
     },
   ]
 
-  constructor() {
-    this.usersSubject.next(this.mockUsers)
+  getUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}`);
   }
 
-  getUsers(): Observable<User[]> {
-    return this.users$
+   getRoles(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrlRoles}`);
   }
 
-  getUserStats(): Observable<UserStats> {
-    return new BehaviorSubject<UserStats>({
-      total: 1270,
-      students: 1250,
-      admins: 20,
-      newToday: 5,
-    }).asObservable()
+  createUser(userData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}`, userData);
   }
 
-  getUsersByCareer(): Observable<any[]> {
-    return new BehaviorSubject([
-      { career: "Ing. Software", count: 450 },
-      { career: "Ing. Forestal", count: 320 },
-      { career: "Lic. Turística", count: 280 },
-      { career: "Lic. Biología", count: 350 },
-      { career: "Lic. C. Ambientales", count: 250 },
-    ]).asObservable()
+  deleteUser(userId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${userId}`);
+  }
+
+  activateUser(userId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/activar/${userId}`, {});
   }
 }

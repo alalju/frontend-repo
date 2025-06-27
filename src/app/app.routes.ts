@@ -15,6 +15,12 @@ export const routes: Routes = [
     data: { roles: ['ADMINISTRADOR'] }
   },
   {
+    path: 'users-admin/crear',
+    loadComponent: () => import('./components/users-admin/add-user/add-user.component').then(m => m.AddUserComponent),
+    canActivate: [RoleGuard],
+    data: { roles: ['ADMINISTRADOR'] }
+  },
+  {
     path: 'student',
     loadComponent: () => import('./components/student/student-dashboard.component').then(m => m.StudentDashboardComponent),
     canActivate: [RoleGuard],
@@ -24,13 +30,13 @@ export const routes: Routes = [
     path: 'works-admin',
     loadComponent: () => import('./components/works-admin/works-admin-dashboard.component').then(m => m.WorksAdminDashboardComponent),
     canActivate: [RoleGuard],
-    data: { roles: ['MAESTRO'] }
+    data: { roles: ['PROFESOR'] }
   },
   {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [RoleGuard],
-    data: { roles: ['MAESTRO', 'ALUMNO', 'ADMINISTRADOR'] }
+    data: { roles: ['PROFESOR', 'ALUMNO', 'ADMINISTRADOR'] }
   },
   {
     path: 'login',

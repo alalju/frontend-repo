@@ -91,7 +91,7 @@ export class SidebarComponent {
   private usersAdminMenuItems: MenuItem[] = [
     { id: "users-admin-dashboard", label: "Dashboard", icon: "bi-people" },
     { id: "manage-users", label: "Gestionar Usuarios", icon: "bi-person-gear" },
-    { id: "create-user", label: "Crear Usuario", icon: "bi-person-plus" },
+    { id: "add-user", label: "Crear Usuario", icon: "bi-person-plus" },
     { id: "system-stats", label: "Estadísticas Sistema", icon: "bi-bar-chart" },
     { id: "settings", label: "Configuración", icon: "bi-gear" },
   ]

@@ -16,7 +16,7 @@ export class RoleGuard implements CanActivate {
     }
 
     const user = JSON.parse(userString);
-    const userRole = user.rol.nombre; // 'ADMINISTRADOR', 'MAESTRO', 'ALUMNO'
+    const userRole = user.rol.nombre; // 'ADMINISTRADOR', 'PROFESOR', 'ALUMNO'
 
     const allowedRoles = route.data['roles'] as string[];
 
