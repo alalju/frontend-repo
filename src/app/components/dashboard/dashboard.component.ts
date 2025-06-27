@@ -1,10 +1,13 @@
-import { Component } from "@angular/core"
+import { Component, OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { SidebarComponent } from "../shared/sidebar/sidebar.component"
 import { HeaderComponent } from "../shared/header/header.component"
 import { StudentDashboardComponent } from "../student/student-dashboard.component"
 import { WorksAdminDashboardComponent } from "../works-admin/works-admin-dashboard.component"
 import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboard.component"
+import { UploadWorkComponent } from "../student/upload-work/upload-work.component"
+import { MyWorksComponent } from "../student/my-works/my-works.component"
+import { AddUserComponent } from "../users-admin/add-user/add-user.component"
 
 @Component({
   selector: "app-dashboard",
@@ -16,9 +19,13 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
     StudentDashboardComponent,
     WorksAdminDashboardComponent,
     UsersAdminDashboardComponent,
+    UploadWorkComponent,
+    MyWorksComponent,
+    AddUserComponent
   ],
   template: `
     <div class="d-flex vh-100">
+      
       <app-sidebar 
         [activeView]="activeView" 
         [userRole]="userRole"
@@ -32,15 +39,46 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
         <main class="flex-fill overflow-auto bg-light p-4">
           <app-student-dashboard *ngIf="activeView === 'student-dashboard'"></app-student-dashboard>
           <app-works-admin-dashboard *ngIf="activeView === 'works-admin-dashboard'"></app-works-admin-dashboard>
-          <app-users-admin-dashboard *ngIf="activeView === 'users-admin-dashboard'"></app-users-admin-dashboard>
+          <app-users-admin-dashboard (viewChanged)="onViewChanged($event)" *ngIf="activeView === 'users-admin-dashboard'" ></app-users-admin-dashboard>
+          <app-upload-work *ngIf="activeView === 'upload-work'"></app-upload-work>
+          <app-my-works *ngIf="activeView === 'my-works'"></app-my-works>
+          <app-add-user *ngIf="activeView === 'add-user'"></app-add-user>
+          
         </main>
       </div>
     </div>
   `,
 })
-export class DashboardComponent {
-  activeView = "student-dashboard"
+export class DashboardComponent implements OnInit {
+  activeView = ""
   userRole: "student" | "works-admin" | "users-admin" = "student"
+
+  
+
+  ngOnInit(): void {
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
+
+    const rol = usuario?.rol?.nombre
+
+    switch (rol) {
+      case "ADMINISTRADOR":
+        this.userRole = "users-admin"
+        this.activeView = "users-admin-dashboard"
+        break
+      case "PROFESOR":
+        this.userRole = "works-admin"
+        this.activeView = "works-admin-dashboard"
+        break
+      case "ALUMNO":
+        this.userRole = "student"
+        this.activeView = "student-dashboard"
+        break
+      default:
+        // Puedes redirigir al login si no hay usuario
+        console.warn("Rol no reconocido o no autenticado.")
+        break
+    }
+  }
 
   onViewChanged(view: string): void {
     this.activeView = view
@@ -48,7 +86,6 @@ export class DashboardComponent {
 
   onRoleChanged(role: "student" | "works-admin" | "users-admin"): void {
     this.userRole = role
-    // Cambiar vista por defecto según el rol
     switch (role) {
       case "student":
         this.activeView = "student-dashboard"

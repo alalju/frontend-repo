@@ -19,7 +19,7 @@ interface MenuItem {
           <i class="bi bi-mortarboard-fill me-2 fs-5"></i>
           <span class="fw-bold">Sistema Académico</span>
         </div>
-
+        <!--
         <select 
           class="form-select bg-success border-success text-white"
           [(ngModel)]="userRole"
@@ -29,6 +29,7 @@ interface MenuItem {
           <option value="works-admin">Admin. Trabajos</option>
           <option value="users-admin">Admin. Usuarios</option>
         </select>
+        -->
       </div>
 
       <nav class="px-3 pb-4">
@@ -90,7 +91,7 @@ export class SidebarComponent {
   private usersAdminMenuItems: MenuItem[] = [
     { id: "users-admin-dashboard", label: "Dashboard", icon: "bi-people" },
     { id: "manage-users", label: "Gestionar Usuarios", icon: "bi-person-gear" },
-    { id: "create-user", label: "Crear Usuario", icon: "bi-person-plus" },
+    { id: "add-user", label: "Crear Usuario", icon: "bi-person-plus" },
     { id: "system-stats", label: "Estadísticas Sistema", icon: "bi-bar-chart" },
     { id: "settings", label: "Configuración", icon: "bi-gear" },
   ]

@@ -1,209 +1,130 @@
-import { Component, type OnInit } from "@angular/core"
+import { Component, EventEmitter, Output, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { UserService } from "../../services/user.service"
-import type { User } from "../../models/user.model"
 
 @Component({
   selector: "app-users-admin-dashboard",
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="container-fluid">
-      <div class="row mb-4">
-        <div class="col">
-          <h2 class="display-6 fw-bold text-dark">Administración de Usuarios</h2>
-          <p class="text-muted">Gestiona usuarios, roles y permisos del sistema</p>
-        </div>
-      </div>
-
-      <!-- Stats Cards -->
-      <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-          <div class="card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Total Usuarios</h6>
-                  <h2 class="card-title mb-0">1,270</h2>
-                  <small class="text-success">+25 este mes</small>
-                </div>
-                <i class="bi bi-people fs-1 text-muted"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <div class="card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Estudiantes</h6>
-                  <h2 class="card-title mb-0 text-success">1,250</h2>
-                  <small class="text-muted">98.4% del total</small>
-                </div>
-                <i class="bi bi-mortarboard fs-1 text-success"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <div class="card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Administradores</h6>
-                  <h2 class="card-title mb-0 text-primary">20</h2>
-                  <small class="text-muted">1.6% del total</small>
-                </div>
-                <i class="bi bi-shield-check fs-1 text-primary"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <div class="card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Nuevos Hoy</h6>
-                  <h2 class="card-title mb-0 text-info">5</h2>
-                  <small class="text-muted">+2 vs ayer</small>
-                </div>
-                <i class="bi bi-person-plus fs-1 text-info"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- User Management -->
-      <div class="row">
-        <div class="col">
-          <div class="card">
-            <div class="card-header">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h5 class="card-title mb-0">Gestión de Usuarios</h5>
-                  <small class="text-muted">Administra cuentas de usuario y permisos</small>
-                </div>
-                <button class="btn btn-success">
-                  <i class="bi bi-person-plus me-2"></i>
-                  Crear Usuario
-                </button>
-              </div>
-            </div>
-            <div class="card-body">
-              <!-- Search and Filters -->
-              <div class="row mb-3">
-                <div class="col-md-4">
-                  <input type="text" class="form-control" placeholder="Buscar usuarios..." [(ngModel)]="searchText">
-                </div>
-                <div class="col-md-3">
-                  <select class="form-select" [(ngModel)]="selectedRole">
-                    <option value="">Todos los roles</option>
-                    <option value="student">Estudiante</option>
-                    <option value="works-admin">Admin. Trabajos</option>
-                    <option value="users-admin">Admin. Usuarios</option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <select class="form-select" [(ngModel)]="selectedStatus">
-                    <option value="">Todos los estados</option>
-                    <option value="active">Activo</option>
-                    <option value="inactive">Inactivo</option>
-                    <option value="blocked">Bloqueado</option>
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <button class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-funnel"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Users Table -->
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Email</th>
-                      <th>Rol</th>
-                      <th>Carrera</th>
-                      <th>Estado</th>
-                      <th>Último Acceso</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let user of users">
-                      <td class="fw-bold">{{ user.name }}</td>
-                      <td>{{ user.email }}</td>
-                      <td>
-                        <span [class]="getRoleBadgeClass(user.role)" class="badge">
-                          <i [class]="getRoleIcon(user.role)" class="me-1"></i>
-                          {{ getRoleText(user.role) }}
-                        </span>
-                      </td>
-                      <td>{{ user.career || 'N/A' }}</td>
-                      <td>
-                        <span [class]="getStatusBadgeClass(user.status)" class="badge">
-                          {{ getStatusText(user.status) }}
-                        </span>
-                      </td>
-                      <td>{{ user.lastLogin }}</td>
-                      <td>
-                        <div class="btn-group" role="group">
-                          <button class="btn btn-sm btn-outline-secondary" title="Ver">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                          <button class="btn btn-sm btn-outline-secondary" title="Editar">
-                            <i class="bi bi-pencil"></i>
-                          </button>
-                          <button class="btn btn-sm btn-outline-warning" title="Bloquear">
-                            <i class="bi bi-lock"></i>
-                          </button>
-                          <button class="btn btn-sm btn-outline-danger" title="Eliminar">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: "./users-admin-dashboard.component.html",
+  styleUrl: "./users-admin-dashboard.component.scss",
 })
 export class UsersAdminDashboardComponent implements OnInit {
-  users: User[] = []
+  @Output() viewChanged = new EventEmitter<string>();
+
+  users: any[] = []
+  roles: any[] = []
   searchText = ""
   selectedRole = ""
   selectedStatus = ""
+  totalUsers = 0
+  totalAlumnos = 0
+  totalProfesores = 0
+  totalAdministradores = 0
+  porcentajeAlumnos = 0
+  porcentajeProfesores = 0
+  porcentajeAdministradores = 0
+  selectedUser: any = null;
+  isModalOpen = false;
 
   constructor(private userService: UserService) {}
 
   ngOnInit(): void {
     this.userService.getUsers().subscribe((users) => {
-      this.users = users
+      console.log("Usuarios obtenidos:", users)
+      this.users = users;
+      this.totalUsers = users.length;
+
+      users.forEach((user) => {
+        if (user.rol.nombre === "ADMINISTRADOR") {
+          this.totalAdministradores++;
+        }
+        
+        if (user.rol.nombre === "PROFESOR") {
+          this.totalProfesores++;
+        }
+        
+        if (user.rol.nombre === "ALUMNO") {
+          this.totalAlumnos++;
+        }
+      })
+
+      // Calcular porcentajes
+      this.porcentajeAlumnos = this.totalUsers ? Math.round((this.totalAlumnos / this.totalUsers) * 100) : 0;
+      this.porcentajeProfesores = this.totalUsers ? Math.round((this.totalProfesores / this.totalUsers) * 100) : 0;
+      this.porcentajeAdministradores = this.totalUsers ? Math.round((this.totalAdministradores / this.totalUsers) * 100) : 0;
     })
+
+    this.userService.getRoles().subscribe((roles) => {
+      console.log("Roles obtenidos:", roles)
+      this.roles = roles;
+    })
+  }
+
+  get filteredUsers() {
+    return this.users.filter(user => {
+      const search = (this.searchText || '').toLowerCase();
+      const matchesText =
+        user.nombre.toLowerCase().includes(search) ||
+        user.correo.toLowerCase().includes(search);
+
+      const matchesRole =
+        !this.selectedRole || user.rol.nombre === this.selectedRole;
+
+      const matchesStatus =
+        !this.selectedStatus ||
+        (this.selectedStatus === 'active' && user.activo === true) ||
+        (this.selectedStatus === 'inactive' && user.activo === false);
+      return matchesText && matchesRole && matchesStatus;
+    });
+  }
+
+  cambiarVista(nuevaVista: string) {
+    console.log("Cambiando vista a:", nuevaVista);
+    this.viewChanged.emit(nuevaVista);
+  }
+
+  viewUser(user: any) {
+    this.selectedUser = user;
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+    this.selectedUser = null;
+  }
+
+  editUser(user: any) {
+    // Aquí puedes abrir un formulario de edición o navegar a la vista de edición
+    console.log('Editar usuario:', user);
+    this.viewChanged.emit('add-user'); // Ejemplo de navegación
+  }
+
+  blockUser(user: any) {
+
+    if (confirm(`¿Seguro que deseas ${user.activo ? 'desactivar':'activar'} a ${user.nombre}?`)) {
+      this.userService.activateUser(user.id).subscribe(() => {
+        user.activo = !user.activo;
+      });
+    }
+  }
+
+  deleteUser(user: any) {
+    if (confirm(`¿Seguro que deseas eliminar a ${user.nombre}?`)) {
+      this.userService.deleteUser(user.id).subscribe(() => {
+        this.users = this.users.filter(u => u.id !== user.id);
+      });
+    }
   }
 
   getRoleBadgeClass(role: string): string {
     switch (role) {
-      case "student":
+      case "ALUMNO":
         return "bg-success"
-      case "works-admin":
+      case "PROFESOR":
         return "bg-primary"
-      case "users-admin":
+      case "ADMINISTRADOR":
         return "bg-info"
       default:
         return "bg-secondary"
@@ -225,40 +146,39 @@ export class UsersAdminDashboardComponent implements OnInit {
 
   getRoleText(role: string): string {
     switch (role) {
-      case "student":
-        return "Estudiante"
-      case "works-admin":
-        return "Admin. Trabajos"
-      case "users-admin":
-        return "Admin. Usuarios"
+      case "ALUMNO":
+        return "Alumno"
+      case "PROFESOR":
+        return "Profesor"
+      case "ADMINISTRADOR":
+        return "Administrador"
       default:
         return "Desconocido"
     }
   }
 
-  getStatusBadgeClass(status: string): string {
+  getStatusBadgeClass(status: boolean): string {
     switch (status) {
-      case "active":
+      case true:
         return "bg-success"
-      case "inactive":
-        return "bg-secondary"
-      case "blocked":
+      case false:
         return "bg-danger"
       default:
         return "bg-secondary"
     }
   }
 
-  getStatusText(status: string): string {
+  getStatusText(status: boolean): string {
     switch (status) {
-      case "active":
+      case true:
         return "Activo"
-      case "inactive":
+      case false:
         return "Inactivo"
-      case "blocked":
-        return "Bloqueado"
       default:
         return "Desconocido"
     }
   }
+
+  
+
 }
