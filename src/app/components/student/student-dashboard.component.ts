@@ -185,7 +185,7 @@ export class StudentDashboardComponent implements OnInit {
   constructor(private workService: WorkService) {}
 
   ngOnInit(): void {
-    this.workService.getWorks().subscribe((works) => {
+    this.workService.getPublicWorks().subscribe((works) => {
       this.recentWorks = works.slice(0, 3)
     })
   }

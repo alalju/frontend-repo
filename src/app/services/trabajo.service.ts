@@ -1,24 +1,9 @@
 import { Injectable, inject } from "@angular/core"
-import { HttpClient, HttpParams } from "@angular/common/http"
-import type { Observable } from "rxjs"
+import { HttpClient, HttpParams, type HttpErrorResponse } from "@angular/common/http"
+import { type Observable, throwError } from "rxjs"
+import { catchError } from "rxjs/operators"
 import { ConfigService } from "./config.service"
-
-export interface TrabajoDTO {
-  id?: number
-  titulo: string
-  resumen: string
-  semestre: number
-  publicado?: boolean
-  fechaEnvio?: string
-  fechaAprobacion?: string
-  comentariosRevision?: string
-  usuarioId: number
-  estadoId: number
-  materiaId?: number
-  carreraId?: number
-  archivoPdfOriginal?: string
-  codigoFuenteOriginal?: string
-}
+import type { TrabajoDTO } from "../models/work.model"
 
 @Injectable({
   providedIn: "root",
@@ -49,7 +34,7 @@ export class TrabajoService {
     formData.append("resumen", trabajoData.resumen)
     formData.append("semestre", trabajoData.semestre.toString())
     formData.append("usuarioId", trabajoData.usuarioId.toString())
-    formData.append("estadoId", "1")
+    formData.append("estadoId", "1") // Estado inicial: Pendiente
 
     if (trabajoData.carreraId) {
       formData.append("carreraId", trabajoData.carreraId.toString())
@@ -68,32 +53,32 @@ export class TrabajoService {
     }
 
     console.log("🌐 [TRABAJOS] Enviando petición POST a:", this.trabajosUrl)
-    console.log("📦 FormData:", {
-      titulo: trabajoData.titulo,
-      resumen: trabajoData.resumen,
-      semestre: trabajoData.semestre,
-      usuarioId: trabajoData.usuarioId,
-      carreraId: trabajoData.carreraId,
-      materiaId: trabajoData.materiaId,
-      pdfFile: pdfFile?.name,
-      codigoFile: codigoFile?.name,
-    })
 
-    return this.http.post<TrabajoDTO>(this.trabajosUrl, formData)
+    return this.http.post<TrabajoDTO>(this.trabajosUrl, formData).pipe(catchError(this.handleError))
   }
 
   // Obtener trabajos del usuario
   obtenerTrabajosDelUsuario(usuarioId: number): Observable<TrabajoDTO[]> {
     const url = `${this.trabajosUrl}/usuario/${usuarioId}`
     console.log("🌐 [TRABAJOS] GET:", url)
-    return this.http.get<TrabajoDTO[]>(url)
+
+    return this.http.get<TrabajoDTO[]>(url).pipe(catchError(this.handleError))
+  }
+
+  // Obtener trabajos públicos y propios
+  obtenerTrabajosPublicosYPropios(usuarioId: number): Observable<TrabajoDTO[]> {
+    const url = `${this.trabajosUrl}/publicos-propios/${usuarioId}`
+    console.log("🌐 [TRABAJOS] GET:", url)
+
+    return this.http.get<TrabajoDTO[]>(url).pipe(catchError(this.handleError))
   }
 
   // Obtener trabajo por ID
   obtenerTrabajoPorId(id: number): Observable<TrabajoDTO> {
     const url = `${this.trabajosUrl}/${id}`
     console.log("🌐 [TRABAJOS] GET:", url)
-    return this.http.get<TrabajoDTO>(url)
+
+    return this.http.get<TrabajoDTO>(url).pipe(catchError(this.handleError))
   }
 
   // Actualizar trabajo
@@ -122,7 +107,8 @@ export class TrabajoService {
 
     const url = `${this.trabajosUrl}/${id}`
     console.log("🌐 [TRABAJOS] PUT:", url)
-    return this.http.put<TrabajoDTO>(url, formData)
+
+    return this.http.put<TrabajoDTO>(url, formData).pipe(catchError(this.handleError))
   }
 
   // Eliminar trabajo
@@ -130,19 +116,24 @@ export class TrabajoService {
     const params = new HttpParams().set("usuarioId", usuarioId.toString())
     const url = `${this.trabajosUrl}/${id}`
     console.log("🌐 [TRABAJOS] DELETE:", url)
-    return this.http.delete<void>(url, { params })
+
+    return this.http.delete<void>(url, { params }).pipe(catchError(this.handleError))
   }
 
-  // Descargar archivo (podría usar microservicio de storage)
+  // Descargar archivo
   descargarArchivo(trabajoId: number, tipoArchivo: string, usuarioId: number): Observable<Blob> {
-    const params = new HttpParams().set("usuarioId", usuarioId.toString())
-    const url = `${this.trabajosUrl}/${trabajoId}/descargar/${tipoArchivo}`
-    console.log("🌐 [TRABAJOS] GET Blob:", url)
-    return this.http.get(url, {
-      params,
-      responseType: "blob",
-    })
+    const params = new HttpParams().set("usuarioId", usuarioId.toString());
+    const url = `${this.trabajosUrl}/descargar/${trabajoId}/${tipoArchivo}`;
+    console.log("🌐 [TRABAJOS] GET Blob:", url);
+
+    return this.http
+      .get(url, {
+        params,
+        responseType: "blob",
+      })
+      .pipe(catchError(this.handleError));
   }
+
 
   // Buscar trabajos
   buscarTrabajos(
@@ -165,6 +156,49 @@ export class TrabajoService {
 
     const url = `${this.trabajosUrl}/buscar/${usuarioId}`
     console.log("🌐 [TRABAJOS] GET Search:", url)
-    return this.http.get<TrabajoDTO[]>(url, { params })
+
+    return this.http.get<TrabajoDTO[]>(url, { params }).pipe(catchError(this.handleError))
+  }
+
+  // Obtener trabajos públicos
+  obtenerTrabajosPublicos(): Observable<TrabajoDTO[]> {
+    const url = `${this.trabajosUrl}/publicos`
+    console.log("🌐 [TRABAJOS] GET:", url)
+
+    return this.http.get<TrabajoDTO[]>(url).pipe(catchError(this.handleError))
+  }
+
+  // Manejo de errores
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = "Ha ocurrido un error desconocido"
+
+    if (error.error instanceof ErrorEvent) {
+      // Error del lado del cliente
+      errorMessage = `Error: ${error.error.message}`
+    } else {
+      // Error del lado del servidor
+      switch (error.status) {
+        case 400:
+          errorMessage = "Solicitud inválida. Verifica los datos enviados."
+          break
+        case 401:
+          errorMessage = "No autorizado. Inicia sesión nuevamente."
+          break
+        case 403:
+          errorMessage = "No tienes permisos para realizar esta acción."
+          break
+        case 404:
+          errorMessage = "Recurso no encontrado."
+          break
+        case 500:
+          errorMessage = "Error interno del servidor. Intenta más tarde."
+          break
+        default:
+          errorMessage = `Error ${error.status}: ${error.message}`
+      }
+    }
+
+    console.error("Error en TrabajoService:", error)
+    return throwError(() => new Error(errorMessage))
   }
 }

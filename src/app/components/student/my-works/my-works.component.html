@@ -1,1 +1,647 @@
-<p>my-works works!</p>
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="breadcrumbItems" class="mb-3"></app-breadcrumb>
+  
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="display-6 fw-bold text-dark">Mis Trabajos</h2>
+      <p class="text-muted">Gestiona y revisa todos tus trabajos académicos</p>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-success" (click)="navigateToUpload()">
+        <i class="bi bi-plus-circle me-2"></i>
+        Subir Nuevo Trabajo
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted">Cargando tus trabajos...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="text-primary mb-1">{{ workStats.total }}</h3>
+                <p class="text-muted mb-0 small">Total Trabajos</p>
+              </div>
+              <i class="bi bi-file-text fs-2 text-primary opacity-50"></i>
+            </div>
+            <div class="progress mt-2" style="height: 4px;">
+              <div class="progress-bar bg-primary" [style.width.%]="100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="text-success mb-1">{{ workStats.approved }}</h3>
+                <p class="text-muted mb-0 small">Aprobados</p>
+                <small class="text-success">{{ workStats.approvalRate }}% tasa de aprobación</small>
+              </div>
+              <i class="bi bi-check-circle fs-2 text-success opacity-50"></i>
+            </div>
+            <div class="progress mt-2" style="height: 4px;">
+              <div class="progress-bar bg-success" [style.width.%]="getProgressWidth(workStats.approved, workStats.total)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="text-warning mb-1">{{ workStats.pending }}</h3>
+                <p class="text-muted mb-0 small">Pendientes</p>
+                <small class="text-muted">En revisión</small>
+              </div>
+              <i class="bi bi-clock fs-2 text-warning opacity-50"></i>
+            </div>
+            <div class="progress mt-2" style="height: 4px;">
+              <div class="progress-bar bg-warning" [style.width.%]="getProgressWidth(workStats.pending, workStats.total)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="text-danger mb-1">{{ workStats.rejected }}</h3>
+                <p class="text-muted mb-0 small">Rechazados</p>
+                <small class="text-muted">Requieren revisión</small>
+              </div>
+              <i class="bi bi-x-circle fs-2 text-danger opacity-50"></i>
+            </div>
+            <div class="progress mt-2" style="height: 4px;">
+              <div class="progress-bar bg-danger" [style.width.%]="getProgressWidth(workStats.rejected, workStats.total)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="row mb-4">
+      <div class="col">
+        <div class="card">
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">
+                <i class="bi bi-funnel me-2"></i>
+                Filtros y Búsqueda
+              </h6>
+              <button 
+                class="btn btn-sm btn-outline-secondary"
+                (click)="toggleFilters()">
+                <i class="bi" [class.bi-chevron-down]="!showFilters" [class.bi-chevron-up]="showFilters"></i>
+                {{ showFilters ? 'Ocultar' : 'Mostrar' }} Filtros
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Quick Search -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Buscar por título, materia o contenido..."
+                    [value]="filters.search"
+                    (input)="onSearchChange($any($event.target).value)">
+                </div>
+              </div>
+              <div class="col-md-3">
+                <select 
+                  class="form-select" 
+                  [(ngModel)]="sortBy"
+                  (ngModelChange)="applyFilters()">
+                  <option value="date-desc">Más recientes</option>
+                  <option value="date-asc">Más antiguos</option>
+                  <option value="title-asc">Título A-Z</option>
+                  <option value="title-desc">Título Z-A</option>
+                  <option value="status">Por estado</option>
+                  <option value="subject">Por materia</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <div class="btn-group w-100" role="group">
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-secondary"
+                    [class.active]="viewMode === 'list'"
+                    (click)="viewMode = 'list'">
+                    <i class="bi bi-list"></i>
+                    Lista
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-secondary"
+                    [class.active]="viewMode === 'grid'"
+                    (click)="viewMode = 'grid'">
+                    <i class="bi bi-grid"></i>
+                    Cuadrícula
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="row" [class.d-none]="!showFilters">
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Estado</label>
+                <select 
+                  class="form-select" 
+                  [(ngModel)]="filters.status"
+                  (ngModelChange)="applyFilters()">
+                  <option value="">Todos los estados</option>
+                  <option value="approved">Aprobados</option>
+                  <option value="pending">Pendientes</option>
+                  <option value="rejected">Rechazados</option>
+                </select>
+              </div>
+              
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Materia</label>
+                <select 
+                  class="form-select" 
+                  [(ngModel)]="filters.subject"
+                  (ngModelChange)="applyFilters()">
+                  <option value="">Todas las materias</option>
+                  <option *ngFor="let subject of subjects" [value]="subject">{{ subject }}</option>
+                </select>
+              </div>
+              
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Desde</label>
+                <input 
+                  type="date" 
+                  class="form-control"
+                  [(ngModel)]="filters.dateFrom"
+                  (ngModelChange)="applyFilters()">
+              </div>
+              
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Hasta</label>
+                <input 
+                  type="date" 
+                  class="form-control"
+                  [(ngModel)]="filters.dateTo"
+                  (ngModelChange)="applyFilters()">
+              </div>
+            </div>
+
+            <!-- Filter Actions -->
+            <div class="row" [class.d-none]="!showFilters">
+              <div class="col">
+                <button class="btn btn-outline-secondary me-2" (click)="clearFilters()">
+                  <i class="bi bi-x-circle me-1"></i>
+                  Limpiar Filtros
+                </button>
+                <span class="text-muted small">
+                  Mostrando {{ filteredWorks.length }} de {{ allWorks.length }} trabajos
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="row mb-3">
+      <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted">
+            Mostrando {{ getPaginatedWorks().length }} de {{ filteredWorks.length }} trabajos
+            <span *ngIf="filteredWorks.length !== allWorks.length">
+              (filtrados de {{ allWorks.length }} total)
+            </span>
+          </span>
+          <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0 small">Elementos por página:</label>
+            <select 
+              class="form-select form-select-sm" 
+              style="width: auto;"
+              [(ngModel)]="itemsPerPage"
+              (ngModelChange)="updatePagination(); currentPage = 1">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Works Content -->
+    <div class="row">
+      <div class="col-lg-9">
+        <div class="card">
+          <div class="card-body p-0">
+            <!-- List View -->
+            <div *ngIf="viewMode === 'list'" class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 40%;">Trabajo</th>
+                    <th style="width: 15%;">Materia</th>
+                    <th style="width: 12%;">Fecha</th>
+                    <th style="width: 13%;">Estado</th>
+                    <th style="width: 10%;">Archivos</th>
+                    <th style="width: 10%;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let work of getPaginatedWorks(); trackBy: trackByWorkId" class="work-row">
+                    <td>
+                      <div class="work-info">
+                        <h6 class="mb-1 fw-bold work-title" (click)="viewWorkDetail(work.id)">
+                          {{ work.title }}
+                        </h6>
+                        <small class="text-muted d-block">{{ work.career }} - {{ work.semester }} Semestre</small>
+                        <p class="mb-0 small text-muted mt-1 work-summary">
+                          {{ work.summary | slice:0:120 }}{{ work.summary.length > 120 ? '...' : '' }}
+                        </p>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-dark">{{ work.subject }}</span>
+                    </td>
+                    <td>
+                      <small class="text-muted">{{ work.date }}</small>
+                      <br>
+                      <small class="text-muted">{{ getTimeAgo(work.updatedAt) }}</small>
+                    </td>
+                    <td>
+                      <span [class]="getStatusBadgeClass(work.status)" class="badge">
+                        <i [class]="getStatusIcon(work.status)" class="me-1"></i>
+                        {{ getStatusText(work.status) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="d-flex flex-column gap-1">
+                        <span *ngIf="work.pdfFile" class="badge bg-danger bg-opacity-10 text-danger small">
+                          <i class="bi bi-file-pdf me-1"></i>PDF
+                        </span>
+                        <span *ngIf="work.sourceCode" class="badge bg-warning bg-opacity-10 text-warning small">
+                          <i class="bi bi-file-zip me-1"></i>Código
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="btn-group" role="group">
+                        <button 
+                          class="btn btn-sm btn-outline-primary" 
+                          title="Ver detalles"
+                          (click)="viewWorkDetail(work.id)">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <div class="dropdown">
+                          <button 
+                            class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li>
+                              <a class="dropdown-item" href="#" 
+                                 [class.disabled]="!work.pdfFile"
+                                 (click)="work.id && downloadFile(work.id, 'pdf'); $event.preventDefault()">
+                                <i class="bi bi-download me-2"></i>Descargar PDF
+                              </a>
+                            </li>
+                            <li>
+                              <a class="dropdown-item" href="#" 
+                                 [class.disabled]="!work.sourceCode"
+                                 (click)="work.id && downloadFile(work.id, 'zip'); $event.preventDefault()">
+                                <i class="bi bi-file-zip me-2"></i>Descargar Código
+                              </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                              <a class="dropdown-item" href="#" 
+                                 [class.disabled]="work.status === 'approved'"
+                                 (click)="work.status !== 'approved' && editWork(work.id); $event.preventDefault()">
+                                <i class="bi bi-pencil me-2"></i>Editar
+                              </a>
+                            </li>
+                            <li>
+                              <a class="dropdown-item text-danger" href="#" 
+                                 (click)="confirmDelete(work); $event.preventDefault()">
+                                <i class="bi bi-trash me-2"></i>Eliminar
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Grid View -->
+            <div *ngIf="viewMode === 'grid'" class="p-3">
+              <div class="row">
+                <div class="col-md-6 col-xl-4 mb-4" *ngFor="let work of getPaginatedWorks(); trackBy: trackByWorkId">
+                  <div class="card h-100 work-card">
+                    <div class="card-body d-flex flex-column">
+                      <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span [class]="getStatusBadgeClass(work.status)" class="badge">
+                          <i [class]="getStatusIcon(work.status)" class="me-1"></i>
+                          {{ getStatusText(work.status) }}
+                        </span>
+                        <div class="dropdown">
+                          <button 
+                            class="btn btn-sm btn-outline-secondary" 
+                            type="button" 
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical"></i>
+                          </button>
+                          <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                              <a class="dropdown-item" href="#" (click)="viewWorkDetail(work.id); $event.preventDefault()">
+                                <i class="bi bi-eye me-2"></i>Ver detalles
+                              </a>
+                            </li>
+                            <li>
+                              <a class="dropdown-item" href="#" 
+                                 [class.disabled]="!work.pdfFile"
+                                 (click)="work.id && downloadFile(work.id, 'pdf'); $event.preventDefault()">
+                                <i class="bi bi-download me-2"></i>Descargar PDF
+                              </a>
+                            </li>
+                            <li>
+                              <a class="dropdown-item" href="#" 
+                                 [class.disabled]="!work.sourceCode"
+                                 (click)="work.id && downloadFile(work.id, 'zip'); $event.preventDefault()">
+                                <i class="bi bi-file-zip me-2"></i>Descargar Código
+                              </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                              <a class="dropdown-item" href="#" 
+                                 [class.disabled]="work.status === 'approved'"
+                                 (click)="work.status !== 'approved' && editWork(work.id); $event.preventDefault()">
+                                <i class="bi bi-pencil me-2"></i>Editar
+                              </a>
+                            </li>
+                            <li>
+                              <a class="dropdown-item text-danger" href="#" 
+                                 (click)="confirmDelete(work); $event.preventDefault()">
+                                <i class="bi bi-trash me-2"></i>Eliminar
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      
+                      <h6 class="card-title work-title" (click)="viewWorkDetail(work.id)">
+                        {{ work.title }}
+                      </h6>
+                      
+                      <div class="mb-2">
+                        <small class="text-muted">
+                          <i class="bi bi-book me-1"></i>{{ work.subject }}
+                        </small>
+                      </div>
+                      
+                      <div class="mb-2">
+                        <small class="text-muted">
+                          <i class="bi bi-mortarboard me-1"></i>{{ work.career }}
+                        </small>
+                      </div>
+                      
+                      <p class="card-text small flex-grow-1">
+                        {{ work.summary | slice:0:150 }}{{ work.summary.length > 150 ? '...' : '' }}
+                      </p>
+                      
+                      <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <div class="d-flex gap-1">
+                          <span *ngIf="work.pdfFile" class="badge bg-danger bg-opacity-10 text-danger small">
+                            <i class="bi bi-file-pdf"></i>
+                          </span>
+                          <span *ngIf="work.sourceCode" class="badge bg-warning bg-opacity-10 text-warning small">
+                            <i class="bi bi-file-zip"></i>
+                          </span>
+                        </div>
+                        <small class="text-muted">
+                          <i class="bi bi-calendar3 me-1"></i>{{ work.date }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="filteredWorks.length === 0" class="text-center py-5">
+              <i class="bi bi-file-text fs-1 text-muted d-block mb-3"></i>
+              <h5 class="text-muted">No se encontraron trabajos</h5>
+              <p class="text-muted mb-4">
+                {{ allWorks.length === 0 ? 
+                   'Aún no has subido ningún trabajo académico.' : 
+                   'No hay trabajos que coincidan con los filtros seleccionados.' }}
+              </p>
+              <button class="btn btn-success" (click)="navigateToUpload()">
+                <i class="bi bi-plus-circle me-2"></i>
+                {{ allWorks.length === 0 ? 'Subir tu primer trabajo' : 'Subir nuevo trabajo' }}
+              </button>
+              <button *ngIf="allWorks.length > 0" class="btn btn-outline-secondary ms-2" (click)="clearFilters()">
+                <i class="bi bi-funnel me-2"></i>
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav *ngIf="totalPages > 1" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" href="#" (click)="changePage(currentPage - 1); $event.preventDefault()">
+                <i class="bi bi-chevron-left"></i>
+              </a>
+            </li>
+            
+            <li *ngFor="let page of [].constructor(totalPages); let i = index" 
+                class="page-item" 
+                [class.active]="currentPage === i + 1">
+              <a class="page-link" href="#" (click)="changePage(i + 1); $event.preventDefault()">
+                {{ i + 1 }}
+              </a>
+            </li>
+            
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" href="#" (click)="changePage(currentPage + 1); $event.preventDefault()">
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+          <div class="card-header bg-success text-white">
+            <h6 class="card-title mb-0">
+              <i class="bi bi-graph-up me-2"></i>
+              Resumen Rápido
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small">Tasa de Aprobación</span>
+              <span class="fw-bold text-success">{{ workStats.approvalRate }}%</span>
+            </div>
+            <div class="progress mb-3" style="height: 6px;">
+              <div class="progress-bar bg-success" [style.width.%]="workStats.approvalRate"></div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small">Trabajos Completados</span>
+              <span class="fw-bold">{{ workStats.approved }}/{{ workStats.total }}</span>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="small">En Proceso</span>
+              <span class="fw-bold text-warning">{{ workStats.pending }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card mb-4">
+          <div class="card-header bg-white">
+            <h6 class="card-title mb-0">
+              <i class="bi bi-clock-history me-2"></i>
+              Actividad Reciente
+            </h6>
+          </div>
+          <div class="card-body">
+            <div *ngFor="let activity of recentActivity" class="activity-item mb-3">
+              <div class="d-flex align-items-center">
+                <div class="activity-icon me-3" [class]="'bg-' + activity.color">
+                  <i [class]="activity.icon + ' text-white'"></i>
+                </div>
+                <div>
+                  <p class="mb-0 small">{{ activity.title }}</p>
+                  <small class="text-muted">{{ activity.date }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header bg-white">
+            <h6 class="card-title mb-0">
+              <i class="bi bi-lightning me-2"></i>
+              Acciones Rápidas
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <button class="btn btn-success" (click)="navigateToUpload()">
+                <i class="bi bi-plus-circle me-2"></i>
+                Subir Nuevo Trabajo
+              </button>
+              
+              <button class="btn btn-outline-primary" (click)="filters.status = 'pending'; applyFilters()">
+                <i class="bi bi-clock me-2"></i>
+                Ver Pendientes
+              </button>
+              
+              <button class="btn btn-outline-warning" (click)="filters.status = 'rejected'; applyFilters()">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Ver Rechazados
+              </button>
+              
+              <button class="btn btn-outline-info" (click)="clearFilters()">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                Mostrar Todos
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Work Detail Modal 
+  <app-work-detail
+    *ngIf="showWorkDetail && selectedWorkId"
+    [workId]="selectedWorkId"
+    [showAsModal]="true"
+    (closeDetail)="closeWorkDetail()"
+    (editWork)="onEditWorkFromDetail($event)"
+    (deleteWork)="onDeleteWorkFromDetail($event)">
+  </app-work-detail>-->
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" [class.show]="workToDelete" [style.display]="workToDelete ? 'block' : 'none'" 
+       *ngIf="workToDelete" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+            Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelDelete()"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar el trabajo?</p>
+          <div class="alert alert-warning">
+            <h6 class="alert-heading">{{ workToDelete.title }}</h6>
+            <p class="mb-0 small">{{ workToDelete.subject }} - {{ workToDelete.career }}</p>
+          </div>
+          <p class="text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            Esta acción no se puede deshacer. Se eliminarán todos los archivos asociados.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+            <i class="bi bi-x-circle me-2"></i>
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-danger" (click)="deleteWork()">
+            <i class="bi bi-trash me-2"></i>
+            Eliminar Trabajo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="workToDelete" *ngIf="workToDelete"></div>
+</div>

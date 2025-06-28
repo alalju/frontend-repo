@@ -195,9 +195,12 @@ export class WorksAdminDashboardComponent implements OnInit {
   selectedStatus = ""
 
   constructor(private workService: WorkService) {}
+  
 
   ngOnInit(): void {
-    this.workService.getWorks().subscribe((works) => {
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const usuarioId = usuario?.id || 0;
+    this.workService.getUserWorks(usuarioId).subscribe((works) => {
       this.pendingWorks = works.filter((work) => work.status === "pending")
     })
   }
