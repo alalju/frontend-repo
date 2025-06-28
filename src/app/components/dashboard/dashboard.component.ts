@@ -41,7 +41,7 @@ import { AddUserComponent } from "../users-admin/add-user/add-user.component"
           <app-works-admin-dashboard *ngIf="activeView === 'works-admin-dashboard'"></app-works-admin-dashboard>
           <app-users-admin-dashboard (viewChanged)="onViewChanged($event)" *ngIf="activeView === 'users-admin-dashboard'" ></app-users-admin-dashboard>
           <app-upload-work *ngIf="activeView === 'upload-work'"></app-upload-work>
-          <app-my-works *ngIf="activeView === 'my-works'"></app-my-works>
+          <app-my-works *ngIf="activeView === 'my-works'" [usuarioId]="usuarioId"></app-my-works>
           <app-add-user *ngIf="activeView === 'add-user'"></app-add-user>
           
         </main>
@@ -54,31 +54,32 @@ export class DashboardComponent implements OnInit {
   userRole: "student" | "works-admin" | "users-admin" = "student"
 
   
+  usuarioId: number = 0;
 
   ngOnInit(): void {
-    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
-
-    const rol = usuario?.rol?.nombre
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    this.usuarioId = usuario?.id || 0;
+    const rol = usuario?.rol?.nombre;
 
     switch (rol) {
       case "ADMINISTRADOR":
-        this.userRole = "users-admin"
-        this.activeView = "users-admin-dashboard"
-        break
+        this.userRole = "users-admin";
+        this.activeView = "users-admin-dashboard";
+        break;
       case "PROFESOR":
-        this.userRole = "works-admin"
-        this.activeView = "works-admin-dashboard"
-        break
+        this.userRole = "works-admin";
+        this.activeView = "works-admin-dashboard";
+        break;
       case "ALUMNO":
-        this.userRole = "student"
-        this.activeView = "student-dashboard"
-        break
+        this.userRole = "student";
+        this.activeView = "student-dashboard";
+        break;
       default:
-        // Puedes redirigir al login si no hay usuario
-        console.warn("Rol no reconocido o no autenticado.")
-        break
+        console.warn("Rol no reconocido o no autenticado.");
+        break;
     }
   }
+
 
   onViewChanged(view: string): void {
     this.activeView = view

@@ -1,0 +1,247 @@
+<!-- Modal Backdrop (si se muestra como modal) -->
+<div *ngIf="showAsModal" class="modal-backdrop" (click)="onClose()"></div>
+
+<!-- Contenedor principal -->
+<div class="work-detail-container" [class.modal-container]="showAsModal" [class.page-container]="!showAsModal">
+  <!-- Header -->
+  <div class="detail-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h2 class="detail-title">
+          <i class="bi bi-file-text me-2"></i>
+          Detalles del Trabajo
+        </h2>
+      </div>
+      <div class="header-right">
+        <button 
+          *ngIf="showAsModal" 
+          type="button" 
+          class="btn-close-custom"
+          (click)="onClose()"
+          title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="loading-text">Cargando detalles del trabajo...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="clearMessages()"></button>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="clearMessages()"></button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="work && !isLoading" class="detail-content">
+    <!-- Status Badge -->
+    <div class="status-section">
+      <span [class]="'status-badge ' + getStatusBadgeClass(work.status)">
+        <i [class]="getStatusIcon(work.status)" class="me-2"></i>
+        {{ getStatusText(work.status) }}
+      </span>
+    </div>
+
+    <!-- Main Info -->
+    <div class="main-info-section">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="info-card">
+            <h3 class="work-title">{{ work.title }}</h3>
+            
+            <div class="work-meta">
+              <div class="meta-item">
+                <i class="bi bi-person-circle"></i>
+                <span class="meta-label">Autor:</span>
+                <span class="meta-value">{{ work.author }}</span>
+              </div>
+              
+              <div class="meta-item">
+                <i class="bi bi-mortarboard"></i>
+                <span class="meta-label">Carrera:</span>
+                <span class="meta-value">{{ work.career }}</span>
+              </div>
+              
+              <div class="meta-item">
+                <i class="bi bi-book"></i>
+                <span class="meta-label">Materia:</span>
+                <span class="meta-value">{{ work.subject }}</span>
+              </div>
+              
+              <div class="meta-item">
+                <i class="bi bi-calendar3"></i>
+                <span class="meta-label">Semestre:</span>
+                <span class="meta-value">{{ work.semester }}</span>
+              </div>
+            </div>
+
+            <div class="summary-section">
+              <h4 class="section-title">
+                <i class="bi bi-file-text me-2"></i>
+                Resumen
+              </h4>
+              <p class="summary-text">{{ work.summary }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="sidebar-info">
+            <!-- Dates Card -->
+            <div class="info-card">
+              <h4 class="section-title">
+                <i class="bi bi-clock-history me-2"></i>
+                Fechas Importantes
+              </h4>
+              
+              <div class="date-item">
+                <span class="date-label">Fecha de envío:</span>
+                <span class="date-value">{{ formatDate(work.date) }}</span>
+              </div>
+              
+              <div class="date-item" *ngIf="work.fechaAprobacion">
+                <span class="date-label">Fecha de aprobación:</span>
+                <span class="date-value">{{ formatDate(work.fechaAprobacion) }}</span>
+              </div>
+              
+              <div class="date-item">
+                <span class="date-label">Última actualización:</span>
+                <span class="date-value">{{ formatDate(work.updatedAt.toISOString()) }}</span>
+              </div>
+            </div>
+
+            <!-- Files Card -->
+            <div class="info-card">
+              <h4 class="section-title">
+                <i class="bi bi-paperclip me-2"></i>
+                Archivos Adjuntos
+              </h4>
+              
+              <div class="files-list">
+                <div class="file-item" *ngIf="work.pdfFile">
+                  <div class="file-info">
+                    <i class="bi bi-file-pdf file-icon pdf-icon"></i>
+                    <div class="file-details">
+                      <span class="file-name">Documento PDF</span>
+                      <small class="file-description">{{ work.pdfFile }}</small>
+                    </div>
+                  </div>
+                  <button 
+                    class="btn btn-sm btn-outline-danger"
+                    [disabled]="isDownloading"
+                    (click)="downloadFile('pdf')"
+                    title="Descargar PDF">
+                    <i class="bi bi-download"></i>
+                  </button>
+                </div>
+
+                <div class="file-item" *ngIf="work.sourceCode">
+                  <div class="file-info">
+                    <i class="bi bi-file-zip file-icon zip-icon"></i>
+                    <div class="file-details">
+                      <span class="file-name">Código Fuente</span>
+                      <small class="file-description">{{ work.sourceCode }}</small>
+                    </div>
+                  </div>
+                  <button 
+                    class="btn btn-sm btn-outline-warning"
+                    [disabled]="isDownloading"
+                    (click)="downloadFile('codigo')"
+                    title="Descargar código">
+                    <i class="bi bi-download"></i>
+                  </button>
+                </div>
+
+                <div class="no-files" *ngIf="!work.pdfFile && !work.sourceCode">
+                  <i class="bi bi-inbox text-muted"></i>
+                  <p class="text-muted mb-0">No hay archivos adjuntos</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section" *ngIf="work.comentariosRevision">
+      <div class="info-card">
+        <h4 class="section-title">
+          <i class="bi bi-chat-left-text me-2"></i>
+          Comentarios de Revisión
+        </h4>
+        <div class="comments-content">
+          <div class="comment-item">
+            <div class="comment-header">
+              <i class="bi bi-person-badge"></i>
+              <span class="comment-author">Revisor</span>
+              <span class="comment-date">{{ formatDate(work.updatedAt.toISOString()) }}</span>
+            </div>
+            <div class="comment-text">
+              {{ work.comentariosRevision }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Section -->
+    <div class="actions-section">
+      <div class="actions-container">
+        <div class="actions-left">
+          <button 
+            class="btn btn-outline-secondary"
+            (click)="onClose()">
+            <i class="bi bi-arrow-left me-2"></i>
+            {{ showAsModal ? 'Cerrar' : 'Volver' }}
+          </button>
+        </div>
+        
+        <div class="actions-right">
+          <button 
+            class="btn btn-outline-primary me-2"
+            [disabled]="!canEdit()"
+            (click)="onEdit()"
+            title="{{ canEdit() ? 'Editar trabajo' : 'No se puede editar un trabajo aprobado' }}">
+            <i class="bi bi-pencil me-2"></i>
+            Editar
+          </button>
+          
+          <button 
+            class="btn btn-outline-danger"
+            (click)="onDelete()"
+            title="Eliminar trabajo">
+            <i class="bi bi-trash me-2"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!work && !isLoading && !errorMessage" class="empty-state">
+    <i class="bi bi-file-x fs-1 text-muted"></i>
+    <h4 class="text-muted mt-3">Trabajo no encontrado</h4>
+    <p class="text-muted">El trabajo solicitado no existe o no tienes permisos para verlo.</p>
+    <button class="btn btn-primary" (click)="onClose()">
+      <i class="bi bi-arrow-left me-2"></i>
+      Volver
+    </button>
+  </div>
+</div>
