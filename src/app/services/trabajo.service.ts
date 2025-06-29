@@ -123,7 +123,7 @@ export class TrabajoService {
   // Descargar archivo
   descargarArchivo(trabajoId: number, tipoArchivo: string, usuarioId: number): Observable<Blob> {
     const params = new HttpParams().set("usuarioId", usuarioId.toString());
-    const url = `${this.trabajosUrl}/descargar/${trabajoId}/${tipoArchivo}`;
+    const url = `${this.trabajosUrl}/${trabajoId}/descargar/${tipoArchivo}`;
     console.log("🌐 [TRABAJOS] GET Blob:", url);
 
     return this.http

@@ -23,10 +23,10 @@ import { Router } from "@angular/router"
             <input 
               type="text" 
               class="form-control border-start-0" 
-              placeholder="Buscar trabajos..."
+              placeholder="Buscar {{ getSearch() }}..."
               [(ngModel)]="searchQuery">
           </div>
-
+          <!--
           <div class="dropdown me-2">
             <button 
               class="btn btn-outline-secondary position-relative"
@@ -48,6 +48,7 @@ import { Router } from "@angular/router"
               <li><a class="dropdown-item text-center" href="#">Ver todas</a></li>
             </ul>
           </div>
+          -->
 
           <div class="dropdown">
             <button 
@@ -59,8 +60,12 @@ import { Router } from "@angular/router"
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><h6 class="dropdown-header">Mi Cuenta</h6></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Perfil</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+              <li>
+                <button class="dropdown-item" (click)="abrirModalUsuario()">
+                  <i class="bi bi-person me-2"></i>Perfil
+                </button>
+              </li>
+              <!--<li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Configuración</a></li>-->
               <li><hr class="dropdown-divider"></li>
               <li>
                 <button class="dropdown-item text-danger" (click)="cerrarSesion()">
@@ -72,11 +77,49 @@ import { Router } from "@angular/router"
         </div>
       </div>
     </header>
+   <div 
+      class="modal fade show d-block" 
+      tabindex="-1" 
+      *ngIf="showUserModal"
+      style="background-color: rgba(0,0,0,0.5);"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header bg-success text-white rounded-top-4">
+            <h5 class="modal-title d-flex align-items-center">
+              <i class="bi bi-person-circle me-2 fs-4"></i> Información del Usuario
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="cerrarModalUsuario()" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Nombre</label>
+              <div class="form-control bg-light">{{ usuario.nombre }}</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Correo</label>
+              <div class="form-control bg-light">{{ usuario.correo }}</div>
+            </div>
+            <div class="mb-2">
+              <label class="form-label fw-bold text-muted">Rol</label>
+              <div class="form-control bg-light">{{ usuario.rol.nombre }}</div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light rounded-bottom-4">
+            <button class="btn btn-outline-danger" (click)="cerrarModalUsuario()">
+              <i class="bi bi-x-circle me-1"></i> Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   `,
 })
 export class HeaderComponent {
   @Input() userRole!: "student" | "works-admin" | "users-admin"
   searchQuery = ""
+  showUserModal = false;
+  usuario: any = {}
 
   constructor(private router: Router) {}
 
@@ -91,6 +134,28 @@ export class HeaderComponent {
       default:
         return "Sistema Académico"
     }
+  }
+
+  getSearch(): string {
+    switch (this.userRole) {
+      case "student":
+        return "estudiante"
+      case "works-admin":
+        return "trabajo"
+      case "users-admin":
+        return "usuario"
+      default:
+        return "Sistema Académico"
+    }
+  }
+
+  abrirModalUsuario(): void {
+    this.showUserModal = true;
+    this.usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
+  }
+
+  cerrarModalUsuario(): void {
+    this.showUserModal = false;
   }
 
   cerrarSesion(): void {

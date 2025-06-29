@@ -1,0 +1,199 @@
+
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="display-6 fw-bold text-dark">Administración de Trabajos</h2>
+      <p class="text-muted">Gestiona y supervisa todos los trabajos académicos</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-subtitle mb-2 text-muted">Total Trabajos</h6>
+              <h2 class="card-title mb-0">{{ totalWorks }}</h2>
+            </div>
+            <i class="bi bi-file-text fs-1 text-muted"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-subtitle mb-2 text-muted">Pendientes</h6>
+              <h2 class="card-title mb-0 text-warning">{{ totalPending }}</h2>
+              <!-- <small class="text-muted">Requieren revisión</small> -->
+            </div>
+            <i class="bi bi-clock fs-1 text-warning"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-subtitle mb-2 text-muted">Aprobados</h6>
+              <h2 class="card-title mb-0 text-success">{{ totalApproved }}</h2>
+            </div>
+            <i class="bi bi-check-circle fs-1 text-success"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-subtitle mb-2 text-muted">Rechazados</h6>
+              <h2 class="card-title mb-0 text-danger">{{ totalRejected }}</h2>
+            </div>
+            <i class="bi bi-x-circle fs-1 text-danger"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Búsqueda Avanzada</h5>
+          <small class="text-muted">Filtra trabajos por múltiples criterios</small>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-5 mb-3">
+              <input type="text" class="form-control" placeholder="Buscar por título..." [(ngModel)]="searchTitle" (ngModelChange)="applyFilters()">
+            </div>
+            <div class="col-md-5 mb-3">
+              <select class="form-select" [(ngModel)]="selectedCareer" (ngModelChange)="applyFilters()">
+                <option value="">Selecciona una carrera</option>
+                <option *ngFor="let carrera of carreras" [value]="carrera.id">
+                  {{ carrera.nombre }}
+                </option>
+              </select>
+            </div>
+            <!-- <div class="col-md-3 mb-3">
+              <select class="form-select" [(ngModel)]="selectedStatus">
+                <option value="">Todos los estados</option>
+                <option value="pending">Pendiente</option>
+                <option value="approved">Aprobado</option>
+                <option value="rejected">Rechazado</option>
+              </select>
+            </div> -->
+            <div class="col-md-2 mb-3">
+              <button class="btn btn-secondary w-100" (click)="applyFilters()">
+                <i class="bi bi-search me-2"></i>
+                Buscar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Works Table -->
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Trabajos Pendientes de Revisión</h5>
+          <small class="text-muted">Trabajos que requieren tu atención</small>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover text-center">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Autor</th>
+                  <th>Carrera</th>
+                  <th>Materia</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let work of pendingWorks">
+                  <td class="fw-bold">{{ work.titulo }}</td>
+                  <td>{{ work.usuario.nombre }}</td>
+                  <td>{{ work.carrera.nombre }}</td>
+                  <td>{{ work.materia.nombre }}</td>
+                  <td>{{ work.fechaEnvio }}</td>
+                  <td>
+                    <span [class]="getStatusBadgeClass(work.estado.nombre)" class="badge">
+                      <i [class]="getStatusIcon(work.estado.nombre)" class="me-1"></i>
+                      {{ getStatusText(work.estado.nombre) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="btn-group center" role="group">
+                      <button class="btn btn-sm btn-outline-secondary" title="Ver" (click)="viewWorkDetails(work)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <a class="btn btn-sm btn-outline-secondary" title="Descargar" (click)="downloadFile(work.id, 'pdf'); $event.preventDefault()">
+                        <i class="bi bi-download"></i>
+                      </a>
+                      <a class="btn btn-sm btn-outline-success" title="Aprobar" (click)="approveWork(work.id, true); $event.preventDefault()">
+                        <i class="bi bi-check"></i>
+                      </a>
+                      <a class="btn btn-sm btn-outline-danger" title="Rechazar" (click)="approveWork(work.id, false); $event.preventDefault()">
+                        <i class="bi bi-x"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Modal de Detalles -->
+  <div class="modal fade show d-block" tabindex="-1" *ngIf="showModal" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header bg-success text-white rounded-top-4">
+          <i class="bi bi-file-earmark-text me-2"></i>
+          <h5 class="modal-title">Detalles del Trabajo</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body" *ngIf="selectedWork">
+          <p><strong>Título:</strong> {{ selectedWork.titulo }}</p>
+          <p><strong>Resumen:</strong> {{ selectedWork.resumen || 'No disponible' }}</p>
+          <p><strong>Autor:</strong> {{ selectedWork.usuario.nombre }}</p>
+          <p><strong>Semestre:</strong> {{ selectedWork.semestre }}</p>
+          <p><strong>Carrera:</strong> {{ selectedWork.carrera.nombre }}</p>
+          <p><strong>Materia:</strong> {{ selectedWork.materia.nombre }}</p>
+          <p><strong>Fecha de Envío:</strong> {{ selectedWork.fechaEnvio }}</p>
+          <p><strong>Estado:</strong> {{ selectedWork.estado.nombre }}</p>
+          <!-- Agrega más campos si es necesario -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-danger" (click)="closeModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

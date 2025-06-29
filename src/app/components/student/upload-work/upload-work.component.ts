@@ -404,7 +404,7 @@ export class UploadWorkComponent implements OnInit {
     resumen: "",
     keywords: "",
     advisor: "",
-    usuarioId: 1,
+    usuarioId: 0,
   }
 
   carreras: CarreraDTO[] = []
@@ -425,6 +425,8 @@ export class UploadWorkComponent implements OnInit {
     //this.config.logUrls()
     this.cargarCarreras()
     this.testConnection()
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    this.workData.usuarioId = usuario?.id || 0;
   }
 
   cargarCarreras(): void {
@@ -533,7 +535,7 @@ export class UploadWorkComponent implements OnInit {
       resumen: "",
       keywords: "",
       advisor: "",
-      usuarioId: 1,
+      usuarioId: 0,
     }
     this.selectedFiles = {}
     this.materias = []

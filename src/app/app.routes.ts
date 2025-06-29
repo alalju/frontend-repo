@@ -33,6 +33,12 @@ export const routes: Routes = [
     data: { roles: ['PROFESOR'] }
   },
   {
+    path: 'works-admin/aprovados',
+    loadComponent: () => import('./components/works-admin/works-approved/works-approved.component').then(m => m.WorksApprovedComponent),
+    canActivate: [RoleGuard],
+    data: { roles: ['PROFESOR'] }
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [RoleGuard],

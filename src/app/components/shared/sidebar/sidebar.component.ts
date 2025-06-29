@@ -82,18 +82,18 @@ export class SidebarComponent {
 
   private worksAdminMenuItems: MenuItem[] = [
     { id: "works-admin-dashboard", label: "Dashboard", icon: "bi-house-door" },
-    { id: "manage-works", label: "Gestionar Trabajos", icon: "bi-file-text" },
-    { id: "pending-works", label: "Trabajos Pendientes", icon: "bi-clock" },
-    { id: "advanced-search", label: "Búsqueda Avanzada", icon: "bi-search" },
-    { id: "statistics", label: "Estadísticas", icon: "bi-bar-chart" },
+    { id: "works-approved", label: "Trabajos aprobados", icon: "bi-check-circle" },
+    { id: "works-rejected", label: "Trabajos rechazados", icon: "bi-x-square" },
+    // { id: "advanced-search", label: "Búsqueda Avanzada", icon: "bi-search" },
+    // { id: "statistics", label: "Estadísticas", icon: "bi-bar-chart" },
   ]
 
   private usersAdminMenuItems: MenuItem[] = [
     { id: "users-admin-dashboard", label: "Dashboard", icon: "bi-people" },
-    { id: "manage-users", label: "Gestionar Usuarios", icon: "bi-person-gear" },
+    // { id: "manage-users", label: "Gestionar Usuarios", icon: "bi-person-gear" },
     { id: "add-user", label: "Crear Usuario", icon: "bi-person-plus" },
-    { id: "system-stats", label: "Estadísticas Sistema", icon: "bi-bar-chart" },
-    { id: "settings", label: "Configuración", icon: "bi-gear" },
+    // { id: "system-stats", label: "Estadísticas Sistema", icon: "bi-bar-chart" },
+    // { id: "settings", label: "Configuración", icon: "bi-gear" },
   ]
 
   getMenuItems(): MenuItem[] {

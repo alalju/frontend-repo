@@ -8,7 +8,8 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
 import { UploadWorkComponent } from "../student/upload-work/upload-work.component"
 import { MyWorksComponent } from "../student/my-works/my-works.component"
 import { AddUserComponent } from "../users-admin/add-user/add-user.component"
-
+import { WorksApprovedComponent } from "../works-admin/works-approved/works-approved.component"
+import { WorksRejectedComponent } from "../works-admin/works-reject/works-rejected.component"
 @Component({
   selector: "app-dashboard",
   standalone: true,
@@ -21,7 +22,9 @@ import { AddUserComponent } from "../users-admin/add-user/add-user.component"
     UsersAdminDashboardComponent,
     UploadWorkComponent,
     MyWorksComponent,
-    AddUserComponent
+    AddUserComponent,
+    WorksApprovedComponent,
+    WorksRejectedComponent
   ],
   template: `
     <div class="d-flex vh-100">
@@ -43,6 +46,8 @@ import { AddUserComponent } from "../users-admin/add-user/add-user.component"
           <app-upload-work *ngIf="activeView === 'upload-work'"></app-upload-work>
           <app-my-works *ngIf="activeView === 'my-works'" [usuarioId]="usuarioId"></app-my-works>
           <app-add-user *ngIf="activeView === 'add-user'"></app-add-user>
+          <app-works-approved *ngIf="activeView === 'works-approved'"></app-works-approved>
+          <app-works-rejected *ngIf="activeView === 'works-rejected'"></app-works-rejected>
           
         </main>
       </div>
