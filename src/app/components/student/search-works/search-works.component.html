@@ -33,11 +33,9 @@
               (ngModelChange)="onFilterChange()"
               [disabled]="isLoading">
               <option [ngValue]="undefined">-- Todas las carreras --</option>
-              @for (carrera of carreras; track carrera.id) {
-                <option [ngValue]="carrera.id">
+                <option *ngFor="let carrera of carreras" [ngValue]="carrera.id">
                   {{ carrera.nombre }}
                 </option>
-              }
             </select>
           </div>
           

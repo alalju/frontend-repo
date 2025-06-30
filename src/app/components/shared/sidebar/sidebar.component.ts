@@ -77,7 +77,7 @@ export class SidebarComponent {
     { id: "upload-work", label: "Subir Trabajo", icon: "bi-cloud-upload" },
     { id: "my-works", label: "Mis Trabajos", icon: "bi-file-text" },
     { id: "search-works", label: "Buscar Trabajos", icon: "bi-search" },
-    { id: "profile", label: "Mi Perfil", icon: "bi-person-gear" },
+    // { id: "profile", label: "Mi Perfil", icon: "bi-person-gear" },
   ]
 
   private worksAdminMenuItems: MenuItem[] = [

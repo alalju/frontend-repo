@@ -750,10 +750,10 @@ export class MyWorksComponent {
 
   // Status helpers
   getStatusBadgeClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case "aprobado":
+    switch (status) {
+      case "Aprobado":
         return "badge bg-success"
-      case "pendiente":
+      case "Pendiente":
         return "badge bg-warning text-dark"
       case "rechazado":
         return "badge bg-danger"
@@ -763,10 +763,10 @@ export class MyWorksComponent {
   }
 
   getStatusIcon(status: string): string {
-    switch (status?.toLowerCase()) {
+    switch (status) {
       case "aprobado":
         return "bi bi-check-circle"
-      case "pendiente":
+      case "Pendiente":
         return "bi bi-clock"
       case "rechazado":
         return "bi bi-x-circle"
@@ -777,11 +777,11 @@ export class MyWorksComponent {
 
   getStatusText(status: string): string {
     switch (status?.toLowerCase()) {
-      case "aprobado":
+      case "Aprobado":
         return "Aprobado"
-      case "pendiente":
+      case "Pendiente":
         return "Pendiente"
-      case "rechazado":
+      case "Rechazado":
         return "Rechazado"
       default:
         return "Desconocido"

@@ -7,6 +7,8 @@ import { TrabajoService, type SearchFilters, type PagedResponse } from "../../..
 import { CarreraService } from "../../../services/carrera.service"
 import type { TrabajoDTO } from "../../../models/work.model"
 import type { CarreraDTO } from "../../../models/carrera.model"
+import { WorkTeacherService } from "../../../services/work-teacher.service";
+import { CommonModule } from "@angular/common";
 
 
 interface BreadcrumbItem {
@@ -18,7 +20,7 @@ interface BreadcrumbItem {
 @Component({
   selector: "app-search-works",
   standalone: true,
-  imports: [FormsModule, RouterModule], // ✅ Solo los imports necesarios
+  imports: [FormsModule, RouterModule, CommonModule], // ✅ Solo los imports necesarios
   templateUrl: "./search-works.component.html",
   styleUrls: ["./search-works.component.scss"],
 })
@@ -29,6 +31,7 @@ export class SearchWorksComponent implements OnInit, OnDestroy {
   // Services
   private trabajoService = inject(TrabajoService)
   private carreraService = inject(CarreraService)
+  private workT = inject(WorkTeacherService)
   private router = inject(Router)
 
   // Breadcrumb
@@ -39,7 +42,7 @@ export class SearchWorksComponent implements OnInit, OnDestroy {
 
   // State variables
   works: TrabajoDTO[] = []
-  carreras: CarreraDTO[] = []
+  carreras: any[] = []
 
   // Search and filters
   filtros: SearchFilters = {
@@ -102,10 +105,7 @@ export class SearchWorksComponent implements OnInit, OnDestroy {
   }
 
   private loadCarreras(): void {
-    this.carreraService
-      .obtenerCarreras()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
+    this.workT.getCarreras().subscribe({
         next: (carreras) => {
           console.log("✅ Carreras loaded:", carreras)
           this.carreras = carreras

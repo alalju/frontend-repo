@@ -9,6 +9,7 @@ import { HttpClient } from "@angular/common/http";
 })
 export class WorkTeacherService {
   private apiUrl = 'http://localhost:8080/api/trabajos';
+  private apiUrl2 = 'http://localhost:8081/api/alumnos/trabajos'
 
   private usersSubject = new BehaviorSubject<User[]>([])
   public users$ = this.usersSubject.asObservable()
@@ -25,6 +26,10 @@ export class WorkTeacherService {
 
   aprobarTrabajo(id: number, aprobar: boolean): Observable<any[]> {
     return this.http.put<any[]>(`${this.apiUrl}/aprobar/${aprobar}/${id}`, "");
+  }
+
+  getMaterias(): Observable<any []> {
+    return this.http.get<any[]>(`${this.apiUrl2}/materias`);
   }
 
   //  getRoles(): Observable<any[]> {

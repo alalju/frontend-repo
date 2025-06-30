@@ -8,6 +8,9 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
 import { UploadWorkComponent } from "../student/upload-work/upload-work.component"
 import { MyWorksComponent } from "../student/my-works/my-works.component"
 import { AddUserComponent } from "../users-admin/add-user/add-user.component"
+import { WorksApprovedComponent } from "../works-admin/works-approved/works-approved.component"
+import { WorksRejectedComponent } from "../works-admin/works-reject/works-rejected.component"
+import { SearchWorksComponent } from "../student/search-works/search-works.component"
 
 @Component({
   selector: "app-dashboard",
@@ -21,7 +24,10 @@ import { AddUserComponent } from "../users-admin/add-user/add-user.component"
     UsersAdminDashboardComponent,
     UploadWorkComponent,
     MyWorksComponent,
-    AddUserComponent
+    AddUserComponent,
+    SearchWorksComponent,
+    WorksApprovedComponent,
+    WorksRejectedComponent
   ],
   template: `
     <div class="d-flex vh-100">
