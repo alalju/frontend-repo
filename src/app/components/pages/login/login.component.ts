@@ -13,8 +13,8 @@ import { AuthService } from "../../../services/auth/auth.service";
 })
 export class LoginComponent {
   loginData = {
-    correo: "adaiirm",
-    contrasenia: "adaiirm",
+    correo: "",
+    contrasenia: "",
   };
   showPassword: boolean = false;
   errorMessage: string = '';

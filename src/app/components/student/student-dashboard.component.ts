@@ -5,6 +5,8 @@ import { BreadcrumbComponent, type BreadcrumbItem } from "../shared/breadcrumb/b
 import { UserService } from "../../services/user.service"
 import type { Work } from "../../models/work.model"
 import  { WorkService } from "../../services/work.service"
+import { AuthService } from "../../services/auth/auth.service"
+import { WorkTeacherService } from "../../services/work-teacher.service"
 
 @Component({
   selector: "app-student-dashboard",
@@ -27,8 +29,8 @@ import  { WorkService } from "../../services/work.service"
         <div class="col-md-3 mb-3">
           <app-stats-card
             title="Trabajos Subidos"
-            [value]="12"
-            subtitle="+2 este mes"
+            [value]="uploadedCount"
+            subtitle="Total subidos"
             icon="bi-file-text"
             subtitleClass="text-success">
           </app-stats-card>
@@ -36,19 +38,8 @@ import  { WorkService } from "../../services/work.service"
 
         <div class="col-md-3 mb-3">
           <app-stats-card
-            title="Aprobados"
-            [value]="8"
-            subtitle="66.7% de aprobación"
-            icon="bi-check-circle"
-            valueClass="text-success"
-            iconClass="text-success">
-          </app-stats-card>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <app-stats-card
             title="Pendientes"
-            [value]="3"
+            [value]="pendingCount"
             subtitle="En revisión"
             icon="bi-clock"
             valueClass="text-warning"
@@ -58,8 +49,19 @@ import  { WorkService } from "../../services/work.service"
 
         <div class="col-md-3 mb-3">
           <app-stats-card
+            title="Aprobados"
+            [value]="approvedCount"
+            subtitle="{{ (uploadedCount / approvedCount)*100}}% de aprobación"
+            icon="bi-check-circle"
+            valueClass="text-success"
+            iconClass="text-success">
+          </app-stats-card>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <app-stats-card
             title="Rechazados"
-            [value]="1"
+            [value]="rejectedCount"
             subtitle="Requiere revisión"
             icon="bi-x-circle"
             valueClass="text-danger"
@@ -67,8 +69,8 @@ import  { WorkService } from "../../services/work.service"
           </app-stats-card>
         </div>
       </div>
-
-      <!-- Quick Actions -->
+      <!--
+      <!-- Quick Actions 
       <div class="row mb-4">
         <div class="col">
           <div class="card">
@@ -101,7 +103,7 @@ import  { WorkService } from "../../services/work.service"
           </div>
         </div>
       </div>
-
+      -->
       <!-- Recent Works -->
       <div class="row">
         <div class="col">
@@ -114,22 +116,24 @@ import  { WorkService } from "../../services/work.service"
               <div *ngFor="let work of recentWorks" class="border rounded p-3 mb-3 work-item">
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="flex-grow-1">
-                    <h6 class="fw-bold mb-1">{{ work.title }}</h6>
+                    <h6 class="fw-bold mb-1">{{ work.titulo }}</h6>
                     <p class="text-muted small mb-1">
-                      <i class="bi bi-book me-1"></i>{{ work.subject }}
+                      <i class="bi bi-book me-1"></i>{{ work.materia.nombre }}
                     </p>
                     <small class="text-muted">
-                      <i class="bi bi-calendar3 me-1"></i>{{ work.date }}
+                      <i class="bi bi-calendar3 me-1"></i>{{ work.fechaEnvio }}
                     </small>
                   </div>
                   <div class="d-flex align-items-center">
-                    <span [class]="getStatusBadgeClass(work.status)" class="badge me-2">
-                      <i [class]="getStatusIcon(work.status)" class="me-1"></i>
-                      {{ getStatusText(work.status) }}
+                    <span [class]="getStatusBadgeClass(work.estado.nombre)" class="badge me-2">
+                      <i [class]="getStatusIcon(work.estado.nombre)" class="me-1"></i>
+                      {{ getStatusText(work.estado.nombre) }}
                     </span>
+                    <!--
                     <button class="btn btn-sm btn-outline-primary">
                       <i class="bi bi-eye me-1"></i>Ver
                     </button>
+                    -->
                   </div>
                 </div>
               </div>
@@ -176,27 +180,45 @@ import  { WorkService } from "../../services/work.service"
   ],
 })
 export class StudentDashboardComponent implements OnInit {
-  recentWorks: Work[] = []
+  recentWorks: any[] = []
   breadcrumbItems: BreadcrumbItem[] = [
     { label: "Inicio", url: "/" },
     { label: "Dashboard", active: true },
   ]
 
-  constructor(private workService: WorkService) {}
+  uploadedCount = 0;
+  approvedCount = 0;
+  pendingCount = 0;
+  rejectedCount = 0;
+
+  constructor(
+    private workService: WorkService,
+    private workServ: WorkTeacherService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.workService.getPublicWorks().subscribe((works) => {
-      this.recentWorks = works.slice(0, 3)
-    })
+    const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
+    
+    if (usuario) {
+      this.workServ.getTrabajos().subscribe((works) => {
+        console.log(works)
+        this.recentWorks = works.slice(0, 3);
+        this.uploadedCount = works.length;
+        this.approvedCount = works.filter(w => w.estado.nombre === 'Aprobado' && usuario.id === w.usuario.id).length;
+        this.pendingCount = works.filter(w => w.estado.nombre === 'Pendiente' && usuario.id === w.usuario.id).length;
+        this.rejectedCount = works.filter(w => w.estado.nombre === 'Rechazado' && usuario.id === w.usuario.id).length;
+      });
+    }
   }
 
   getStatusBadgeClass(status: string): string {
     switch (status) {
-      case "approved":
+      case "Aprobado":
         return "bg-success"
-      case "pending":
+      case "Pendiente":
         return "bg-warning text-dark"
-      case "rejected":
+      case "Rechazado":
         return "bg-danger"
       default:
         return "bg-secondary"
@@ -205,11 +227,11 @@ export class StudentDashboardComponent implements OnInit {
 
   getStatusIcon(status: string): string {
     switch (status) {
-      case "approved":
+      case "Aprobado":
         return "bi bi-check-circle"
-      case "pending":
+      case "Pendiente":
         return "bi bi-clock"
-      case "rejected":
+      case "Rechazado":
         return "bi bi-x-circle"
       default:
         return "bi bi-question-circle"
@@ -218,11 +240,11 @@ export class StudentDashboardComponent implements OnInit {
 
   getStatusText(status: string): string {
     switch (status) {
-      case "approved":
+      case "Aprobado":
         return "Aprobado"
-      case "pending":
+      case "Pendiente":
         return "Pendiente"
-      case "rejected":
+      case "Rechazado":
         return "Rechazado"
       default:
         return "Desconocido"

@@ -1,0 +1,380 @@
+<div class="container-fluid">
+  <!-- BREADCRUMB -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      @for (item of breadcrumbItems; track item.label) {
+        <li class="breadcrumb-item" [class.active]="item.active">
+          @if (!item.active && item.url) {
+            <a [routerLink]="item.url">{{ item.label }}</a>
+          } @else {
+            <span>{{ item.label }}</span>
+          }
+        </li>
+      }
+    </ol>
+  </nav>
+
+  <!-- FILTERS SECTION -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-funnel me-2"></i>
+        Filtros de Búsqueda
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="filters-container">
+        <div class="row">
+          <div class="col-md-3">
+            <label class="form-label">Carrera</label>
+            <select 
+              class="form-select"
+              [(ngModel)]="filtros.carreraId"
+              (ngModelChange)="onFilterChange()"
+              [disabled]="isLoading">
+              <option [ngValue]="undefined">-- Todas las carreras --</option>
+                <option *ngFor="let carrera of carreras" [ngValue]="carrera.id">
+                  {{ carrera.nombre }}
+                </option>
+            </select>
+          </div>
+          
+          <div class="col-md-3">
+            <label class="form-label">Título</label>
+            <input 
+              type="text"
+              class="form-control"
+              [(ngModel)]="filtros.titulo" 
+              placeholder="Buscar por título"
+              (ngModelChange)="onFilterChange()"
+              [disabled]="isLoading">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Desde</label>
+            <input 
+              type="date"
+              class="form-control"
+              [(ngModel)]="filters.dateFrom"
+              (ngModelChange)="onFilterChange()"
+              [disabled]="isLoading">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Hasta</label>
+            <input 
+              type="date"
+              class="form-control"
+              [(ngModel)]="filters.dateTo"
+              (ngModelChange)="onFilterChange()"
+              [disabled]="isLoading">
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-4">
+            <label class="form-label">Ordenar por</label>
+            <select 
+              class="form-select"
+              [(ngModel)]="sortBy"
+              (ngModelChange)="onSortChange()"
+              [disabled]="isLoading">
+              <option value="fechaEnvio">Fecha</option>
+              <option value="titulo">Título</option>
+              <option value="usuario.apellido">Autor</option>
+            </select>
+          </div>
+
+          <div class="col-md-4 d-flex align-items-end">
+            <div class="btn-group w-100">
+              <button 
+                class="btn btn-outline-success"
+                [class.active]="sortDir === 'desc'"
+                (click)="sortDir = 'desc'; onSortChange()"
+                [disabled]="isLoading">
+                <i class="bi bi-sort-down"></i>
+              </button>
+              <button 
+                class="btn btn-outline-success"
+                [class.active]="sortDir === 'asc'"
+                (click)="sortDir = 'asc'; onSortChange()"
+                [disabled]="isLoading">
+                <i class="bi bi-sort-up"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-4 d-flex align-items-end">
+            <button 
+              class="btn btn-success w-100"
+              (click)="performSearch()"
+              [disabled]="isSearching">
+              @if (isSearching) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              } @else {
+                <i class="bi bi-search me-2"></i>
+              }
+              {{ isSearching ? 'Buscando...' : 'Buscar' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="filters-actions mt-3">
+          <button 
+            class="btn btn-outline-secondary"
+            (click)="clearFilters()"
+            [disabled]="isLoading">
+            <i class="bi bi-x-circle me-2"></i>
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ERROR MESSAGE -->
+  @if (errorMessage) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ errorMessage }}
+      <button type="button" class="btn-close" (click)="clearError()"></button>
+    </div>
+  }
+
+  <!-- LOADING STATE -->
+  @if (isSearching) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-3 text-muted">Buscando trabajos...</p>
+    </div>
+  }
+
+  <!-- NO SEARCH PERFORMED YET -->
+  @if (!hasSearched && !isSearching) {
+    <div class="text-center py-5">
+      <i class="bi bi-search display-1 text-muted"></i>
+      <h3 class="mt-3 text-muted">Buscar Trabajos</h3>
+      <p class="text-muted">Usa los filtros de arriba y presiona "Buscar" para encontrar trabajos</p>
+    </div>
+  }
+
+  <!-- NO RESULTS FOUND -->
+  @if (hasSearched && !isSearching && !hasResults && !errorMessage) {
+    <div class="text-center py-5">
+      <i class="bi bi-file-earmark-x display-1 text-muted"></i>
+      <h3 class="mt-3">No se encontraron trabajos</h3>
+      <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+      <button class="btn btn-outline-primary" (click)="clearFilters()">
+        <i class="bi bi-arrow-clockwise me-2"></i>
+        Limpiar Filtros
+      </button>
+    </div>
+  }
+
+  <!-- RESULTS SECTION -->
+  @if (hasResults && !isSearching) {
+    <!-- Results Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="mb-1">Resultados de Búsqueda</h4>
+        <p class="text-muted mb-0">
+          Mostrando {{ showingFrom }} - {{ showingTo }} de {{ totalElements }} trabajos
+        </p>
+      </div>
+      
+      <!-- View Mode Toggle -->
+      <div class="btn-group" role="group">
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary"
+          [class.active]="viewMode === 'grid'"
+          (click)="viewMode = 'grid'">
+          <i class="bi bi-grid-3x3-gap"></i>
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary"
+          [class.active]="viewMode === 'list'"
+          (click)="viewMode = 'list'">
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- GRID VIEW -->
+    @if (viewMode === 'grid') {
+      <div class="row">
+        @for (work of works; track trackByWorkId($index, work)) {
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <span class="badge" [class]="getStatusBadgeClass(work.estado?.nombre || '')">
+                    {{ getStatusText(work.estado?.nombre || '') }}
+                  </span>
+                  <small class="text-muted">{{ formatDate(work.fechaEnvio) }}</small>
+                </div>
+                
+                <h5 class="card-title">{{ work.titulo }}</h5>
+                <p class="card-text text-muted small">
+                  {{ truncateText(work.resumen, 100) }}
+                </p>
+                
+                <div class="mt-auto">
+                  <div class="d-flex justify-content-between align-items-center text-small">
+                    @if (work.carrera) {
+                      <span class="badge bg-light text-dark">
+                        {{ work.carrera.nombre }}
+                      </span>
+                    }
+                    @if (work.usuario) {
+                      <span class="text-muted small">
+                        {{ work.usuario.nombre }} {{ work.usuario.apellido }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card-footer bg-transparent">
+                <div class="d-flex gap-2">
+                  <button 
+                    class="btn btn-primary btn-sm flex-fill"
+                    (click)="viewWorkDetail(work.id!)">
+                    <i class="bi bi-eye me-1"></i>
+                    Ver Detalle
+                  </button>
+                  <button 
+                    class="btn btn-outline-secondary btn-sm"
+                    (click)="downloadFile(work.id!, 'pdf')"
+                    title="Descargar PDF">
+                    <i class="bi bi-file-pdf"></i>
+                  </button>
+                  <button 
+                    class="btn btn-outline-secondary btn-sm"
+                    (click)="downloadFile(work.id!, 'codigo')"
+                    title="Descargar Código">
+                    <i class="bi bi-file-zip"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- LIST VIEW -->
+    @if (viewMode === 'list') {
+      <div class="list-group">
+        @for (work of works; track trackByWorkId($index, work)) {
+          <div class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="mb-1">{{ work.titulo }}</h5>
+                  <span class="badge" [class]="getStatusBadgeClass(work.estado?.nombre || '')">
+                    {{ getStatusText(work.estado?.nombre || '') }}
+                  </span>
+                </div>
+                
+                <p class="mb-2 text-muted">{{ work.resumen }}</p>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex gap-3">
+                    @if (work.carrera) {
+                      <small class="text-muted">
+                        <i class="bi bi-mortarboard me-1"></i>
+                        {{ work.carrera.nombre }}
+                      </small>
+                    }
+                    @if (work.usuario) {
+                      <small class="text-muted">
+                        <i class="bi bi-person me-1"></i>
+                        {{ work.usuario.nombre }} {{ work.usuario.apellido }}
+                      </small>
+                    }
+                    <small class="text-muted">
+                      <i class="bi bi-calendar me-1"></i>
+                      {{ formatDate(work.fechaEnvio) }}
+                    </small>
+                  </div>
+                  
+                  <div class="d-flex gap-2">
+                    <button 
+                      class="btn btn-primary btn-sm"
+                      (click)="viewWorkDetail(work.id!)">
+                      <i class="bi bi-eye me-1"></i>
+                      Ver Detalle
+                    </button>
+                    <button 
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="downloadFile(work.id!, 'pdf')"
+                      title="Descargar PDF">
+                      <i class="bi bi-file-pdf"></i>
+                    </button>
+                    <button 
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="downloadFile(work.id!, 'codigo')"
+                      title="Descargar Código">
+                      <i class="bi bi-file-zip"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- PAGINATION -->
+    @if (totalPages > 1) {
+      <nav aria-label="Paginación de trabajos" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="isFirst">
+            <button class="page-link" (click)="changePage(currentPage - 1)" [disabled]="isFirst">
+              <i class="bi bi-chevron-left"></i>
+              Anterior
+            </button>
+          </li>
+          
+          @for (page of displayedPages; track page) {
+            <li class="page-item" [class.active]="page === currentPage">
+              <button class="page-link" (click)="changePage(page)">
+                {{ page + 1 }}
+              </button>
+            </li>
+          }
+          
+          <li class="page-item" [class.disabled]="isLast">
+            <button class="page-link" (click)="changePage(currentPage + 1)" [disabled]="isLast">
+              Siguiente
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    }
+
+    <!-- Items per page -->
+    <div class="d-flex justify-content-center mt-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted small">Elementos por página:</span>
+        <select 
+          class="form-select form-select-sm" 
+          style="width: auto;"
+          [(ngModel)]="itemsPerPage"
+          (ngModelChange)="changePageSize($event)">
+          <option [value]="6">6</option>
+          <option [value]="12">12</option>
+          <option [value]="24">24</option>
+          <option [value]="48">48</option>
+        </select>
+      </div>
+    </div>
+  }
+</div>

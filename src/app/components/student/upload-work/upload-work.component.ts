@@ -4,6 +4,7 @@ import { FormsModule } from "@angular/forms"
 import { TrabajoService } from "../../../services/trabajo.service"
 import { AcademicoService, type CarreraDTO, type MateriaDTO } from "../../../services/academico.service"
 import { ConfigService } from "../../../services/config.service"
+import { WorkTeacherService } from "../../../services/work-teacher.service"
 
 @Component({
   selector: "app-upload-work",
@@ -393,6 +394,7 @@ export class UploadWorkComponent implements OnInit {
   // Servicios
   private trabajoService = inject(TrabajoService)
   private academicoService = inject(AcademicoService)
+  private workTeacherService = inject(WorkTeacherService)
   private config = inject(ConfigService)
 
   // Datos del formulario
@@ -404,11 +406,11 @@ export class UploadWorkComponent implements OnInit {
     resumen: "",
     keywords: "",
     advisor: "",
-    usuarioId: 1,
+    usuarioId: 0,
   }
 
   carreras: CarreraDTO[] = []
-  materias: MateriaDTO[] = []
+  materias: any[] = []
   semestres = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   selectedFiles: { pdf?: File; source?: File } = {}
 
@@ -425,10 +427,12 @@ export class UploadWorkComponent implements OnInit {
     //this.config.logUrls()
     this.cargarCarreras()
     this.testConnection()
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    this.workData.usuarioId = usuario?.id || 0;
   }
 
   cargarCarreras(): void {
-    this.academicoService.obtenerCarreras().subscribe({
+    this.workTeacherService.getCarreras().subscribe({
       next: (carreras) => {
         this.carreras = carreras
         console.log("✅ Carreras cargadas:", carreras.length)
@@ -441,10 +445,14 @@ export class UploadWorkComponent implements OnInit {
 
   onCarreraChange(): void {
     if (this.workData.carreraId) {
-      this.academicoService.obtenerMateriasPorCarrera(this.workData.carreraId).subscribe({
-        next: (materias) => {
-          this.materias = materias
-          this.workData.materiaId = null
+      console.log("dataaa, ", this.workData.carreraId)
+      this.workTeacherService.getMaterias().subscribe({
+        next: (materias) => {  
+          this.materias = materias.filter(
+            (m) => (m?.carrera?.id == this.workData.carreraId)
+          );
+          console.log(materias)
+
         },
       })
     } else {
@@ -533,7 +541,7 @@ export class UploadWorkComponent implements OnInit {
       resumen: "",
       keywords: "",
       advisor: "",
-      usuarioId: 1,
+      usuarioId: 0,
     }
     this.selectedFiles = {}
     this.materias = []

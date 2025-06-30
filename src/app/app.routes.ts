@@ -1,5 +1,6 @@
 import type { Routes } from "@angular/router"
 import { RoleGuard } from "./guards/role.guard"
+import { WorkDetailComponent } from "./components/student/work-detail/work-detail.component"
 
 export const routes: Routes = [
   // redirigir "/" a login (o a dashboard o lo que prefieras)
@@ -33,6 +34,12 @@ export const routes: Routes = [
     data: { roles: ['PROFESOR'] }
   },
   {
+    path: 'works-admin/aprovados',
+    loadComponent: () => import('./components/works-admin/works-approved/works-approved.component').then(m => m.WorksApprovedComponent),
+    canActivate: [RoleGuard],
+    data: { roles: ['PROFESOR'] }
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [RoleGuard],
@@ -46,8 +53,10 @@ export const routes: Routes = [
     path: 'unauthorized',
     loadComponent: () => import('./components/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
   },
+  { path: 'work-detail/:id', component: WorkDetailComponent },
   {
     path: '**',
     loadComponent: () => import('./components/not-found//not-found/not-found.component').then(m => m.NotFoundComponent)
   }
+
 ]

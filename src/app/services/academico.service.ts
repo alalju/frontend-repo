@@ -29,33 +29,18 @@ export class AcademicoService {
     return this.config.materiasService
   }
 
-  // Obtener carreras desde microservicio académico
+  // MÉTODO ORIGINAL - NO TOCAR
   obtenerCarreras(): Observable<CarreraDTO[]> {
     console.log("🌐 [ACADEMICO] GET Carreras:", this.carrerasUrl)
-
-    // Si tienes el microservicio académico disponible:
-    // return this.http.get<CarreraDTO[]>(this.carrerasUrl)
-
-    // Mientras tanto, datos estáticos:
-    const carreras: CarreraDTO[] = [
-      { id: 1, nombre: "Ing. Desarrollo de Software" },
-      { id: 2, nombre: "Ing. Forestal" },
-      { id: 3, nombre: "Lic. Administración Turística" },
-      { id: 4, nombre: "Lic. Biología" },
-      { id: 5, nombre: "Lic. Ciencias Ambientales" },
-    ]
-    return of(carreras)
+    return this.http.get<CarreraDTO[]>(this.carrerasUrl)
   }
 
-  // Obtener materias por carrera
+  // MÉTODO ORIGINAL - NO TOCAR
   obtenerMateriasPorCarrera(carreraId: number): Observable<MateriaDTO[]> {
     const url = `${this.materiasUrl}/carrera/${carreraId}`
     console.log("🌐 [ACADEMICO] GET Materias:", url)
 
-    // Si tienes el microservicio académico disponible:
-    // return this.http.get<MateriaDTO[]>(url)
-
-    // Mientras tanto, datos estáticos:
+    // Datos estáticos mientras no tengas endpoint de materias
     const materiasPorCarrera: { [key: number]: MateriaDTO[] } = {
       1: [
         { id: 1, nombre: "Programación Web", carreraId: 1 },
@@ -73,14 +58,33 @@ export class AcademicoService {
         { id: 9, nombre: "Marketing Turístico", carreraId: 3 },
         { id: 10, nombre: "Patrimonio Cultural", carreraId: 3 },
       ],
+      4: [
+        { id: 11, nombre: "Botánica", carreraId: 4 },
+        { id: 12, nombre: "Zoología", carreraId: 4 },
+        { id: 13, nombre: "Genética", carreraId: 4 },
+      ],
+      5: [
+        { id: 14, nombre: "Impacto Ambiental", carreraId: 5 },
+        { id: 15, nombre: "Gestión Ambiental", carreraId: 5 },
+        { id: 16, nombre: "Química Ambiental", carreraId: 5 },
+      ],
     }
 
     return of(materiasPorCarrera[carreraId] || [])
   }
 
-  // Obtener todas las materias
+  // MÉTODO ORIGINAL - NO TOCAR
   obtenerTodasLasMaterias(): Observable<MateriaDTO[]> {
     console.log("🌐 [ACADEMICO] GET Todas las materias:", this.materiasUrl)
     return this.http.get<MateriaDTO[]>(this.materiasUrl)
+  }
+
+  // MÉTODOS NUEVOS SOLO PARA COMPATIBILIDAD CON EL COMPONENTE DE BÚSQUEDA
+  getCarreras(): Observable<CarreraDTO[]> {
+    return this.obtenerCarreras()
+  }
+
+  getMateriasPorCarrera(carreraId: number): Observable<MateriaDTO[]> {
+    return this.obtenerMateriasPorCarrera(carreraId)
   }
 }
