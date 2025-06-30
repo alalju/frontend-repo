@@ -1,163 +1,157 @@
-import { Component, Input, Output, EventEmitter, type OnInit, type OnDestroy } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import  { TrabajoService } from "../../../services/trabajo.service"
-import  { TrabajoAdapterService } from "../../../services/trabajo-adapter.service"
-import  { Work } from "../../../models/work.model"
-import { Subject } from "rxjs"
-import { takeUntil } from "rxjs/operators"
+import { Component, Input, OnInit } from '@angular/core'
+import { ActivatedRoute, Router } from '@angular/router'
+import { TrabajoService } from '../../../services/trabajo.service'
+import { TrabajoDTO } from '../../../models/work.model'
+import { AuthService } from '../../../services/auth/auth.service'
+
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+
 
 @Component({
-  selector: "app-work-detail",
+  selector: 'app-work-detail',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: "./work-detail.component.html",
-  styleUrls: ["./work-detail.component.scss"],
+  templateUrl: './work-detail.component.html',
+  styleUrls: ['./work-detail.component.scss'],
 })
-export class WorkDetailComponent implements OnInit, OnDestroy {
-  @Input() workId!: number
+export class WorkDetailComponent implements OnInit {
+  @Input() work?: TrabajoDTO
   @Input() showAsModal = false
-  @Output() closeDetail = new EventEmitter<void>()
-  @Output() editWork = new EventEmitter<number>()
-  @Output() deleteWork = new EventEmitter<number>()
 
-  private destroy$ = new Subject<void>()
-  private currentUserId = 1 // Temporal - obtener del servicio de auth
-
-  work: Work | null = null
+  currentUserId: number | undefined;
   isLoading = false
   isDownloading = false
-  errorMessage = ""
-  successMessage = ""
+  errorMessage = ''
+  successMessage = ''
 
   constructor(
-    private trabajoService: TrabajoService,
-    private adapterService: TrabajoAdapterService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private authService: AuthService,
+    private trabajoService: TrabajoService
   ) {}
 
   ngOnInit(): void {
-    if (this.workId) {
-      this.loadWorkDetail()
+    
+    // Si ya se pasó el trabajo por @Input(), no hacemos nada
+    if (this.work) {
+      return
     }
+
+    const idFromRoute = this.route.snapshot.paramMap.get('id')
+    if (idFromRoute) {
+      const trabajoId = parseInt(idFromRoute, 10)
+      if (!isNaN(trabajoId)) {
+        this.fetchTrabajoById(trabajoId)
+      }
+    }
+
+    this.currentUserId = this.authService.getCurrentUserId()
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next()
-    this.destroy$.complete()
-  }
-
-  loadWorkDetail(): void {
+  fetchTrabajoById(id: number): void {
     this.isLoading = true
-    this.clearMessages()
-
-    this.trabajoService
-      .obtenerTrabajoPorId(this.workId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (trabajoDTO) => {
-          this.work = this.adapterService.convertToWork(trabajoDTO)
-          this.isLoading = false
-        },
-        error: (error) => {
-          this.errorMessage = error.message
-          this.isLoading = false
-        },
-      })
-  }
-
-  downloadFile(tipoArchivo: "pdf" | "codigo"): void {
-    if (!this.work) return
-
-    this.isDownloading = true
-    this.clearMessages()
-
-    this.trabajoService
-      .descargarArchivo(this.work.id, tipoArchivo, this.currentUserId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob)
-          const link = document.createElement("a")
-          link.href = url
-          link.download = `${this.work?.title}_${tipoArchivo}.${tipoArchivo === "pdf" ? "pdf" : "zip"}`
-          link.click()
-          window.URL.revokeObjectURL(url)
-
-          this.successMessage = "Descarga iniciada correctamente"
-          this.isDownloading = false
-        },
-        error: (error) => {
-          this.errorMessage = `Error al descargar archivo: ${error.message}`
-          this.isDownloading = false
-        },
-      })
+    this.trabajoService.obtenerTrabajoPorId(id).subscribe({
+      next: (data: TrabajoDTO) => {
+        this.work = data
+        this.isLoading = false
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar el trabajo:', err)
+        this.errorMessage = 'No se pudo cargar el trabajo.'
+        this.isLoading = false
+      },
+    })
   }
 
   onClose(): void {
-    this.closeDetail.emit()
+    if (this.showAsModal) {
+      // Emitir evento o cerrar modal según sea necesario
+    } else {
+      this.router.navigate(['/search-works'])
+    }
+  }
+
+  formatDate(dateStr?: string): string {
+    if (!dateStr) return 'Fecha no disponible'; // o simplemente ''
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }
+
+  getStatusBadgeClass(status: any): string {
+    return status?.nombre === 'Aprobado' ? 'badge-success' : 'badge-warning'
+  }
+
+  getStatusIcon(status: any): string {
+    return status?.nombre === 'Aprobado' ? 'bi bi-check-circle' : 'bi bi-clock'
+  }
+
+  getStatusText(status: any): string {
+    return status?.nombre || 'Desconocido'
+  }
+
+  canEdit(): boolean {
+    return this.work?.estado?.nombre !== 'Aprobado'
   }
 
   onEdit(): void {
     if (this.work) {
-      this.editWork.emit(this.work.id)
+      this.router.navigate(['/edit-work', this.work.id])
     }
   }
 
   onDelete(): void {
-    if (this.work) {
-      this.deleteWork.emit(this.work.id)
+    if (!this.work) return
+    if (!confirm('¿Estás seguro de eliminar este trabajo?')) return
+    if (this.work && this.work.id !== undefined && this.currentUserId !== undefined) {
+      this.trabajoService.eliminarTrabajo(this.work.id, this.currentUserId).subscribe({
+          next: () => {
+            console.log("Trabajo eliminado con éxito");
+          },
+          error: (error) => {
+            console.error("Error al eliminar trabajo:", error);
+          }
+        });
+      } else {
+        console.error("❌ No se pudo eliminar: falta work o currentUserId.");
+      }
+  }
+
+  downloadFile(type: 'pdf' | 'codigo'): void {
+  if (!this.work || typeof this.work.id !== 'number') return;
+
+  this.isDownloading = true;
+
+  this.trabajoService.descargarArchivo(this.work.id, type).subscribe({
+    next: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+
+      const extension = type === 'pdf' ? 'pdf' : 'zip';
+      const nombre = `${this.work?.titulo} || 'archivo'}_${type}.${extension}`;
+      a.download = nombre;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+      this.isDownloading = false;
+    },
+    error: () => {
+      this.errorMessage = 'No se pudo descargar el archivo';
+      this.isDownloading = false;
     }
-  }
+  });
+}
 
-  canEdit(): boolean {
-    return this.work?.status !== "approved"
-  }
 
-  getStatusBadgeClass(status: string): string {
-    switch (status) {
-      case "approved":
-        return "status-badge bg-success"
-      case "pending":
-        return "status-badge bg-warning text-dark"
-      case "rejected":
-        return "status-badge bg-danger"
-      default:
-        return "status-badge bg-secondary"
-    }
-  }
-
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case "approved":
-        return "bi bi-check-circle"
-      case "pending":
-        return "bi bi-clock"
-      case "rejected":
-        return "bi bi-x-circle"
-      default:
-        return "bi bi-question-circle"
-    }
-  }
-
-  getStatusText(status: string): string {
-    switch (status) {
-      case "approved":
-        return "Aprobado"
-      case "pending":
-        return "Pendiente"
-      case "rejected":
-        return "Rechazado"
-      default:
-        return "Desconocido"
-    }
-  }
-
-  formatDate(dateString?: string): string {
-    if (!dateString) return ""
-    return new Date(dateString).toLocaleDateString()
-  }
-
-   clearMessages(): void {
-    this.errorMessage = ""
-    this.successMessage = ""
+  clearMessages(): void {
+    this.errorMessage = ''
+    this.successMessage = ''
   }
 }

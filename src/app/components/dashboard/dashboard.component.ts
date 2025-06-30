@@ -8,6 +8,8 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
 import { UploadWorkComponent } from "../student/upload-work/upload-work.component"
 import { MyWorksComponent } from "../student/my-works/my-works.component"
 import { AddUserComponent } from "../users-admin/add-user/add-user.component"
+import { SearchWorksComponent  } from "../student/search-works/search-works.component";
+
 
 @Component({
   selector: "app-dashboard",
@@ -21,8 +23,9 @@ import { AddUserComponent } from "../users-admin/add-user/add-user.component"
     UsersAdminDashboardComponent,
     UploadWorkComponent,
     MyWorksComponent,
-    AddUserComponent
-  ],
+    AddUserComponent,
+    SearchWorksComponent 
+],
   template: `
     <div class="d-flex vh-100">
       
@@ -42,6 +45,7 @@ import { AddUserComponent } from "../users-admin/add-user/add-user.component"
           <app-users-admin-dashboard (viewChanged)="onViewChanged($event)" *ngIf="activeView === 'users-admin-dashboard'" ></app-users-admin-dashboard>
           <app-upload-work *ngIf="activeView === 'upload-work'"></app-upload-work>
           <app-my-works *ngIf="activeView === 'my-works'" [usuarioId]="usuarioId"></app-my-works>
+          <app-search-works *ngIf="activeView === 'search-works'"></app-search-works>
           <app-add-user *ngIf="activeView === 'add-user'"></app-add-user>
           
         </main>
