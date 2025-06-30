@@ -18,7 +18,7 @@ export class ConfigService {
     },
     // Microservicio de gestión académica
     academico: {
-      baseUrl: "http://localhost:8082",
+      baseUrl: "http://localhost:8080", // CORREGIDO: era 8082
       contextPath: "/api/academico",
       endpoints: {
         carreras: "/carreras",

@@ -51,10 +51,12 @@
   <div *ngIf="work && !isLoading" class="detail-content">
     <!-- Status Badge -->
     <div class="status-section">
+      <!--
       <span [class]="'status-badge ' + getStatusBadgeClass(work.status)">
-        <i [class]="getStatusIcon(work.status)" class="me-2"></i>
+        <i [class]="getStatusIcon(work?.materia)" class="me-2"></i>
         {{ getStatusText(work.status) }}
       </span>
+      -->
     </div>
 
     <!-- Main Info -->
@@ -62,31 +64,31 @@
       <div class="row">
         <div class="col-lg-8">
           <div class="info-card">
-            <h3 class="work-title">{{ work.title }}</h3>
+            <h3 class="work-title">{{ work.titulo }}</h3>
             
             <div class="work-meta">
               <div class="meta-item">
                 <i class="bi bi-person-circle"></i>
                 <span class="meta-label">Autor:</span>
-                <span class="meta-value">{{ work.author }}</span>
+                <span class="meta-value">{{ work.usuario?.nombre }}</span>
               </div>
               
               <div class="meta-item">
                 <i class="bi bi-mortarboard"></i>
                 <span class="meta-label">Carrera:</span>
-                <span class="meta-value">{{ work.career }}</span>
+                <span class="meta-value">{{ work.carrera }}</span>
               </div>
               
               <div class="meta-item">
                 <i class="bi bi-book"></i>
                 <span class="meta-label">Materia:</span>
-                <span class="meta-value">{{ work.subject }}</span>
+                <span class="meta-value">{{ work.materia?.nombre }}</span>
               </div>
               
               <div class="meta-item">
                 <i class="bi bi-calendar3"></i>
                 <span class="meta-label">Semestre:</span>
-                <span class="meta-value">{{ work.semester }}</span>
+                <span class="meta-value">{{ work.semestre }}</span>
               </div>
             </div>
 
@@ -95,7 +97,7 @@
                 <i class="bi bi-file-text me-2"></i>
                 Resumen
               </h4>
-              <p class="summary-text">{{ work.summary }}</p>
+              <p class="summary-text">{{ work.resumen}}</p>
             </div>
           </div>
         </div>
@@ -111,7 +113,7 @@
               
               <div class="date-item">
                 <span class="date-label">Fecha de envío:</span>
-                <span class="date-value">{{ formatDate(work.date) }}</span>
+                <span class="date-value">{{ formatDate(work.fechaEnvio) }}</span>
               </div>
               
               <div class="date-item" *ngIf="work.fechaAprobacion">
@@ -119,10 +121,7 @@
                 <span class="date-value">{{ formatDate(work.fechaAprobacion) }}</span>
               </div>
               
-              <div class="date-item">
-                <span class="date-label">Última actualización:</span>
-                <span class="date-value">{{ formatDate(work.updatedAt.toISOString()) }}</span>
-              </div>
+        
             </div>
 
             <!-- Files Card -->
@@ -133,12 +132,12 @@
               </h4>
               
               <div class="files-list">
-                <div class="file-item" *ngIf="work.pdfFile">
+                <div class="file-item" *ngIf="work.archivoPdfSistema">
                   <div class="file-info">
                     <i class="bi bi-file-pdf file-icon pdf-icon"></i>
                     <div class="file-details">
                       <span class="file-name">Documento PDF</span>
-                      <small class="file-description">{{ work.pdfFile }}</small>
+                      <small class="file-description">{{ work.archivoPdfOriginal }}</small>
                     </div>
                   </div>
                   <button 
@@ -150,12 +149,12 @@
                   </button>
                 </div>
 
-                <div class="file-item" *ngIf="work.sourceCode">
+                <div class="file-item" *ngIf="work.codigoFuenteSistema">
                   <div class="file-info">
                     <i class="bi bi-file-zip file-icon zip-icon"></i>
                     <div class="file-details">
                       <span class="file-name">Código Fuente</span>
-                      <small class="file-description">{{ work.sourceCode }}</small>
+                      <small class="file-description">{{ work.codigoFuenteOriginal }}</small>
                     </div>
                   </div>
                   <button 
@@ -167,7 +166,7 @@
                   </button>
                 </div>
 
-                <div class="no-files" *ngIf="!work.pdfFile && !work.sourceCode">
+                <div class="no-files" *ngIf="!work.archivoPdfOriginal && !work.codigoFuenteOriginal">
                   <i class="bi bi-inbox text-muted"></i>
                   <p class="text-muted mb-0">No hay archivos adjuntos</p>
                 </div>
@@ -187,11 +186,6 @@
         </h4>
         <div class="comments-content">
           <div class="comment-item">
-            <div class="comment-header">
-              <i class="bi bi-person-badge"></i>
-              <span class="comment-author">Revisor</span>
-              <span class="comment-date">{{ formatDate(work.updatedAt.toISOString()) }}</span>
-            </div>
             <div class="comment-text">
               {{ work.comentariosRevision }}
             </div>

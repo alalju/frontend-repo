@@ -1,69 +1,91 @@
-import { Injectable } from "@angular/core"
-import { HttpClient } from "@angular/common/http"
-import { type Observable, of } from "rxjs"
-
-export interface CarreraDTO {
-  id: number
-  nombre: string
-}
-
-export interface MateriaDTO {
-  id: number
-  nombre: string
-  carreraId: number
-}
+import { Injectable, inject } from "@angular/core"
+import { HttpClient, type HttpErrorResponse } from "@angular/common/http"
+import { type Observable, throwError } from "rxjs"
+import { catchError } from "rxjs/operators"
+import { ConfigService } from "./config.service"
+import type { CarreraDTO, CreateCarreraRequest, UpdateCarreraRequest } from "../models/carrera.model"
 
 @Injectable({
   providedIn: "root",
 })
 export class CarreraService {
-  private readonly API_URL = "http://localhost:8081/api/alumnos"
+  private http: HttpClient = inject(HttpClient)
+  private config: ConfigService = inject(ConfigService)
 
-  constructor(private http: HttpClient) {}
-
-  // Si tienes endpoints para carreras, úsalos. Si no, datos estáticos por ahora
-  obtenerCarreras(): Observable<CarreraDTO[]> {
-    // Opción 1: Si tienes endpoint
-    // return this.http.get<CarreraDTO[]>(`${this.API_URL}/carreras`)
-
-    // Opción 2: Datos estáticos mientras no tengas el endpoint
-    const carreras: CarreraDTO[] = [
-      { id: 1, nombre: "Ing. Desarrollo de Software" },
-      { id: 2, nombre: "Ing. Forestal" },
-      { id: 3, nombre: "Lic. Administración Turística" },
-      { id: 4, nombre: "Lic. Biología" },
-      { id: 5, nombre: "Lic. Ciencias Ambientales" },
-    ]
-    return of(carreras)
+  // Usar la URL del microservicio académico
+  private get carrerasUrl(): string {
+    return this.config.carrerasService
   }
 
-  obtenerMateriasPorCarrera(carreraId: number): Observable<MateriaDTO[]> {
-    // Opción 1: Si tienes endpoint
-    // return this.http.get<MateriaDTO[]>(`${this.API_URL}/materias/carrera/${carreraId}`)
+  // Obtener todas las carreras
+  obtenerCarreras(): Observable<CarreraDTO[]> {
+    const url = this.carrerasUrl
+    console.log("🌐 [CARRERAS] GET:", url)
+    return this.http.get<CarreraDTO[]>(url).pipe(catchError(this.handleError))
+  }
 
-    // Opción 2: Datos estáticos por carrera
-    const materiasPorCarrera: { [key: number]: MateriaDTO[] } = {
-      1: [
-        // Ing. Desarrollo de Software
-        { id: 1, nombre: "Programación Web", carreraId: 1 },
-        { id: 2, nombre: "Base de Datos", carreraId: 1 },
-        { id: 3, nombre: "Ingeniería de Software", carreraId: 1 },
-        { id: 4, nombre: "Desarrollo Móvil", carreraId: 1 },
-      ],
-      2: [
-        // Ing. Forestal
-        { id: 5, nombre: "Silvicultura", carreraId: 2 },
-        { id: 6, nombre: "Manejo Forestal", carreraId: 2 },
-        { id: 7, nombre: "Ecología Forestal", carreraId: 2 },
-      ],
-      3: [
-        // Lic. Administración Turística
-        { id: 8, nombre: "Gestión Turística", carreraId: 3 },
-        { id: 9, nombre: "Marketing Turístico", carreraId: 3 },
-        { id: 10, nombre: "Patrimonio Cultural", carreraId: 3 },
-      ],
+  // Obtener carrera por ID
+  obtenerCarreraPorId(id: number): Observable<CarreraDTO> {
+    const url = `${this.carrerasUrl}/${id}`
+    console.log("🌐 [CARRERAS] GET:", url)
+    return this.http.get<CarreraDTO>(url).pipe(catchError(this.handleError))
+  }
+
+  // Crear nueva carrera (si tienes permisos de admin)
+  crearCarrera(carrera: CreateCarreraRequest): Observable<CarreraDTO> {
+    const url = this.carrerasUrl
+    console.log("🌐 [CARRERAS] POST:", url)
+    return this.http.post<CarreraDTO>(url, carrera).pipe(catchError(this.handleError))
+  }
+
+  // Actualizar carrera (si tienes permisos de admin)
+  actualizarCarrera(id: number, carrera: UpdateCarreraRequest): Observable<CarreraDTO> {
+    const url = `${this.carrerasUrl}/${id}`
+    console.log("🌐 [CARRERAS] PUT:", url)
+    return this.http.put<CarreraDTO>(url, carrera).pipe(catchError(this.handleError))
+  }
+
+  // Eliminar carrera (si tienes permisos de admin)
+  eliminarCarrera(id: number): Observable<void> {
+    const url = `${this.carrerasUrl}/${id}`
+    console.log("🌐 [CARRERAS] DELETE:", url)
+    return this.http.delete<void>(url).pipe(catchError(this.handleError))
+  }
+
+  // Manejo de errores
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = "Ha ocurrido un error desconocido"
+
+    if (error.error instanceof ErrorEvent) {
+      // Error del lado del cliente
+      errorMessage = `Error: ${error.error.message}`
+    } else {
+      // Error del lado del servidor
+      switch (error.status) {
+        case 400:
+          errorMessage = "Solicitud inválida. Verifica los datos enviados."
+          break
+        case 401:
+          errorMessage = "No autorizado. Inicia sesión nuevamente."
+          break
+        case 403:
+          errorMessage = "No tienes permisos para realizar esta acción."
+          break
+        case 404:
+          errorMessage = "Carrera no encontrada."
+          break
+        case 409:
+          errorMessage = "Ya existe una carrera con ese código."
+          break
+        case 500:
+          errorMessage = "Error interno del servidor. Intenta más tarde."
+          break
+        default:
+          errorMessage = `Error ${error.status}: ${error.message}`
+      }
     }
 
-    return of(materiasPorCarrera[carreraId] || [])
+    console.error("Error en CarreraService:", error)
+    return throwError(() => new Error(errorMessage))
   }
 }

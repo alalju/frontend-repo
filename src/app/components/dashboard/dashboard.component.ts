@@ -42,7 +42,10 @@ import { AddUserComponent } from "../users-admin/add-user/add-user.component"
           <app-users-admin-dashboard (viewChanged)="onViewChanged($event)" *ngIf="activeView === 'users-admin-dashboard'" ></app-users-admin-dashboard>
           <app-upload-work *ngIf="activeView === 'upload-work'"></app-upload-work>
           <app-my-works *ngIf="activeView === 'my-works'" [usuarioId]="usuarioId"></app-my-works>
+          <app-search-works *ngIf="activeView === 'search-works'"></app-search-works>
           <app-add-user *ngIf="activeView === 'add-user'"></app-add-user>
+          <app-works-approved *ngIf="activeView === 'works-approved'"></app-works-approved>
+          <app-works-rejected *ngIf="activeView === 'works-rejected'"></app-works-rejected>
           
         </main>
       </div>

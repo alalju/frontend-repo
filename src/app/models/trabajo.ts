@@ -13,6 +13,7 @@ export interface TrabajoDTO {
   carreraId?: number
   archivoPdfOriginal?: string
   codigoFuenteOriginal?: string
+  status: string; 
 }
 
 export interface WorkStats {

@@ -11,6 +11,7 @@ export interface Work {
   pdfFile?: string
   sourceCode?: string
   updatedAt: Date
+  createdAt: Date
   comentariosRevision?: string
   fechaAprobacion?: string
   // Campos adicionales para mapear con el backend
@@ -18,30 +19,11 @@ export interface Work {
   estadoId?: number
   materiaId?: number
   carreraId?: number
-}
-
-export interface TrabajoDTO {
-  id?: number
-  titulo: string
-  resumen: string
-  semestre: number
   publicado?: boolean
-  fechaEnvio?: string
-  fechaAprobacion?: string
-  comentariosRevision?: string
-  usuarioId: number
-  estadoId: number
-  materiaId?: number
-  carreraId?: number
-  archivoPdfOriginal?: string
-  codigoFuenteOriginal?: string
-  // Campos adicionales para el frontend
-  autor?: string
-  carrera?: string
-  materia?: string
-  estado?: string
 }
 
+
+// ✅ INTERFACES QUE NECESITAN OTROS COMPONENTES - NO TOCAR
 export interface WorkStats {
   total: number
   approved: number
@@ -59,15 +41,16 @@ export interface WorkFilter {
   dateTo?: string
 }
 
+// ✅ INTERFACES DE SOPORTE
 export interface UsuarioDTO {
   id?: number
   nombre: string
+  apellido: string
   correo: string
-  contraseña?: string
+  numeroControl?: string
+  telefono?: string
   activo?: boolean
   fechaRegistro?: string
-  telefono?: string
-  numeroControl?: string
   rolId?: number
 }
 
@@ -88,4 +71,93 @@ export interface MateriaDTO {
   nombre: string
   codigo?: string
   carreraId?: number
+}
+
+// Tipo específico para usuario en el contexto de trabajos
+export interface UsuarioTrabajoDTO {
+  id: number
+  nombre: string
+  apellido: string
+  correo?: string // Opcional ya que no siempre está disponible
+}
+
+// Tipos para otros objetos relacionados
+export interface EstadoDTO {
+  id: number
+  nombre: string
+}
+
+export interface MateriaDTO {
+  id: number
+  nombre: string
+}
+
+export interface CarreraDTO {
+  id: number
+  nombre: string
+}
+
+export interface TrabajoDTO {
+  id?: number
+  titulo: string
+  resumen: string
+  archivoPdfSistema?: string
+  codigoFuenteSistema?: string
+  archivoPdfOriginal?: string
+  codigoFuenteOriginal?: string
+  fechaEnvio?: string
+  fechaAprobacion?: string
+  publicado?: boolean
+  semestre?: number
+  comentariosRevision?: string
+
+  // ✅ Usar el tipo específico para trabajos
+  usuario?: UsuarioTrabajoDTO
+  estado?: EstadoDTO
+  materia?: MateriaDTO
+  carrera?: CarreraDTO
+}
+
+// Tipos para formularios y creación
+export interface CreateTrabajoDTO {
+  titulo: string
+  resumen: string
+  semestre: number
+  usuarioId: number
+  carreraId?: number
+  materiaId?: number
+}
+
+export interface UpdateTrabajoDTO extends Partial<CreateTrabajoDTO> {
+  id: number
+}
+
+// Tipos para filtros y búsqueda
+export interface TrabajoFilters {
+  titulo?: string
+  autor?: string
+  carrera?: string
+  estado?: string
+  fechaInicio?: Date
+  fechaFin?: Date
+}
+
+// Tipos para estadísticas
+export interface TrabajoStats {
+  total: number
+  pendientes: number
+  aprobados: number
+  rechazados: number
+  publicados: number
+}
+
+// Tipos para respuestas paginadas
+export interface PagedTrabajoResponse {
+  content: TrabajoDTO[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
+  first: boolean
+  last: boolean
 }

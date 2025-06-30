@@ -181,4 +181,40 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Detalle de Usuario -->
+  <div class="modal fade show" tabindex="-1" [ngStyle]="{'display': isModalOpen ? 'block' : 'none', 'background': isModalOpen ? 'rgba(0,0,0,0.5)' : 'none'}" *ngIf="isModalOpen">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header bg-primary text-white rounded-top-4">
+          <h5 class="modal-title fw-bold"><i class="bi bi-person-circle me-2"></i>Detalles del Usuario</h5>
+          <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body bg-light">
+          <div *ngIf="selectedUser">
+            <div class="mb-3">
+              <span class="badge px-3 py-2" [ngClass]="getRoleBadgeClass(selectedUser.rol.nombre)">
+                <i [class]="getRoleIcon(selectedUser.rol.nombre)" class="me-1"></i>
+                {{ getRoleText(selectedUser.rol.nombre) }}
+              </span>
+              <span class="badge ms-2 px-3 py-2" [ngClass]="getStatusBadgeClass(selectedUser.activo)">
+                {{ getStatusText(selectedUser.activo) }}
+              </span>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item bg-light"><strong>Nombre:</strong> {{ selectedUser.nombre }}</li>
+              <li class="list-group-item bg-light"><strong>Correo:</strong> {{ selectedUser.correo }}</li>
+              <li class="list-group-item bg-light" *ngIf="selectedUser.career"><strong>Carrera:</strong> {{ selectedUser.career }}</li>
+              <!-- Agrega más campos si es necesario -->
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer bg-white rounded-bottom-4">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            <i class="bi bi-x-lg me-1"></i>Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

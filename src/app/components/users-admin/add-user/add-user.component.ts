@@ -38,25 +38,38 @@ export class AddUserComponent implements OnInit {
   successMessage = '';
 
   limpiarFormulario() {
-    // ...existing code...
+    this.userData = {
+      nombre: '',
+      correo: '',
+      rol: {
+        id: null
+      },
+      activo: false,
+      contrasenia: '',
+      confirmPassword: ''
+    };
   }
 
   onSubmit() {
     console.log("Datos del usuario:", this.userData);
-
     this.userService.createUser(this.userData).subscribe({
       next: (response) => {
         console.log("Usuario creado:", response);
         this.successMessage = 'Usuario creado exitosamente';
         this.errorMessage = '';
         this.limpiarFormulario();
-      }
-      ,
+      },
       error: (error) => {
         console.error("Error al crear el usuario:", error);
-        this.errorMessage = 'Error al crear el usuario. Por favor, inténtalo de nuevo.';
+        if (error.status === 400) {
+          this.errorMessage = error.error.description;
+        } else if (error.status === 500) {
+          this.errorMessage = 'Error interno del servidor al crear el usuario.';
+        } else {
+          this.errorMessage = 'Error al crear el usuario. Por favor, inténtalo de nuevo.';
+        }
         this.successMessage = '';
-      } 
+      }
     });
   }
 }
