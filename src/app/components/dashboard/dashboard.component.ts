@@ -8,8 +8,6 @@ import { UsersAdminDashboardComponent } from "../users-admin/users-admin-dashboa
 import { UploadWorkComponent } from "../student/upload-work/upload-work.component"
 import { MyWorksComponent } from "../student/my-works/my-works.component"
 import { AddUserComponent } from "../users-admin/add-user/add-user.component"
-import { SearchWorksComponent  } from "../student/search-works/search-works.component";
-
 
 @Component({
   selector: "app-dashboard",
@@ -23,9 +21,8 @@ import { SearchWorksComponent  } from "../student/search-works/search-works.comp
     UsersAdminDashboardComponent,
     UploadWorkComponent,
     MyWorksComponent,
-    AddUserComponent,
-    SearchWorksComponent 
-],
+    AddUserComponent
+  ],
   template: `
     <div class="d-flex vh-100">
       
@@ -47,6 +44,8 @@ import { SearchWorksComponent  } from "../student/search-works/search-works.comp
           <app-my-works *ngIf="activeView === 'my-works'" [usuarioId]="usuarioId"></app-my-works>
           <app-search-works *ngIf="activeView === 'search-works'"></app-search-works>
           <app-add-user *ngIf="activeView === 'add-user'"></app-add-user>
+          <app-works-approved *ngIf="activeView === 'works-approved'"></app-works-approved>
+          <app-works-rejected *ngIf="activeView === 'works-rejected'"></app-works-rejected>
           
         </main>
       </div>

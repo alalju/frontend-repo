@@ -8,46 +8,14 @@ import { HttpClient } from "@angular/common/http";
   providedIn: "root",
 })
 export class UserService {
-  private apiUrl = 'http://localhost:8081/api/usuarios';
-  private apiUrlRoles = 'http://localhost:8081/api/roles';
+  private apiUrl = 'http://localhost:8082/api/usuarios';
+  private apiUrlRoles = 'http://localhost:8082/api/roles';
 
   private usersSubject = new BehaviorSubject<User[]>([])
   public users$ = this.usersSubject.asObservable()
 
   constructor(private http: HttpClient) {}
   
-  private mockUsers: User[] = [
-    {
-      id: 1,
-      name: "Juan Pérez",
-      email: "juan.perez@universidad.edu",
-      role: "student",
-      career: "Ing. Desarrollo de Software",
-      status: "active",
-      lastLogin: "2024-01-15",
-      createdAt: new Date("2024-01-01"),
-    },
-    {
-      id: 2,
-      name: "María García",
-      email: "maria.garcia@universidad.edu",
-      role: "student",
-      career: "Ing. Forestal",
-      status: "active",
-      lastLogin: "2024-01-14",
-      createdAt: new Date("2024-01-02"),
-    },
-    {
-      id: 3,
-      name: "Dr. Carlos López",
-      email: "carlos.lopez@universidad.edu",
-      role: "works-admin",
-      status: "active",
-      lastLogin: "2024-01-16",
-      createdAt: new Date("2023-12-01"),
-    },
-  ]
-
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}`);
   }
